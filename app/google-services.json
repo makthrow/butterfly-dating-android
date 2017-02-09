@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "861340327923",
+    "firebase_url": "https://butterfly2-ac0f9.firebaseio.com",
+    "project_id": "butterfly2-ac0f9",
+    "storage_bucket": "butterfly2-ac0f9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:861340327923:android:68d77826e34fe406",
+        "android_client_info": {
+          "package_name": "airjaw.butterflyandroid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "861340327923-pl6u0qb7k408c8sbvdvlu8igklrmlg2h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6PlsxfccCFBsWRk-Z3WIKIFkvsKGDaQU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "861340327923-bb4n2p9g7v9r25mcin9ricjjqnhqpnv4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "AJK.butterfly2"
+              }
+            },
+            {
+              "client_id": "861340327923-pl6u0qb7k408c8sbvdvlu8igklrmlg2h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
