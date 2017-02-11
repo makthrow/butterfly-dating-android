@@ -24,7 +24,7 @@ public class InboxActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.my_navigation_items, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
     @Override

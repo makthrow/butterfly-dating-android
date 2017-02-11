@@ -1,6 +1,7 @@
 package airjaw.butterflyandroid;
 
 import android.content.Intent;
+import android.nfc.Tag;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,12 +27,16 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = "LoginActivity";
+
     private TextView info;
     private LoginButton loginButton;
     private CallbackManager callbackManager;
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseUser mFirebaseUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,39 +87,37 @@ public class LoginActivity extends AppCompatActivity {
 
 
         // Firebase
-        mAuth = FirebaseAuth.getInstance();
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
+                mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+                if (mFirebaseUser != null) {
                     // User is signed in
-                    Log.d("Firebase Login", "onAuthStateChanged:signed_in:" + user.getUid());
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + mFirebaseUser.getUid());
 
                     // Name, email address, and profile photo Url
-                    String name = user.getDisplayName();
-                    String email = user.getEmail();
+                    String name = mFirebaseUser.getDisplayName();
+                    String email = mFirebaseUser.getEmail();
                    // Uri photoUrl = user.getPhotoUrl();
 
                     // The user's ID, unique to the Firebase project. Do NOT use this value to
                     // authenticate with your backend server, if you have one. Use
                     // FirebaseUser.getToken() instead.
-                    String uid = user.getUid();
+                    String uid = mFirebaseUser.getUid();
                     Log.i("debug", uid);
 
-                    //upload info to firebase db
-
+                    //TODO: upload info to firebase db
 
 
                     // transition to home screen
                     loggedInTransition();
 
                 } else {
-                    // User is signed out
-                    Log.d("Firebase Login", "onAuthStateChanged:signed_out");
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
-                // ...
             }
         };
     }
@@ -122,14 +125,14 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
+        mFirebaseAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
+            mFirebaseAuth.removeAuthStateListener(mAuthListener);
         }
     }
 
@@ -149,7 +152,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.d("Facebook Login", "handleFacebookAccessToken:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
+        mFirebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
