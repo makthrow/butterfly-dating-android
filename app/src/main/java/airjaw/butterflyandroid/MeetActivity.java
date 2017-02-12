@@ -1,6 +1,7 @@
 package airjaw.butterflyandroid;
 
 import android.content.Intent;
+import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +13,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
+import com.firebase.geofire.LocationCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,6 +40,8 @@ public class MeetActivity extends AppCompatActivity {
     private static ArrayList<String> mediaIntroQueueListTitles = new ArrayList<>();
     ArrayAdapter<String> stringAdapter;
 
+    GeoLocation lastLocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,8 +49,6 @@ public class MeetActivity extends AppCompatActivity {
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
-
-        setupFirebaseListener();
 
         // LOG
         Log.i("Constants", Constants.userID);
@@ -70,6 +75,15 @@ public class MeetActivity extends AppCompatActivity {
                 //playVideoAtCell(position)
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        getUserLocation();
+
+        getLocalIntroductions();
     }
 
     private void playVideoAtCell(int cellNumber){
@@ -135,13 +149,60 @@ public class MeetActivity extends AppCompatActivity {
 
         }
     }
-    private void setupFirebaseListener() {
+    private void getLocalIntroductions() {
+
+        final ArrayList<String> mediaLocationKeysWithinRadius = new ArrayList<String>();
+
+        lastLocation = GeoFireGlobal.getInstance().getLastLocation();
+
+        if (lastLocation != null) {
+            GeoQuery circleQuery = Constants.geoFireMedia.queryAtLocation(lastLocation, 50);
+
+            circleQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                @Override
+                public void onKeyEntered(String key, GeoLocation location) {
+                    System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+                    Log.i("Query: Key added", key.toString());
+//                    if (!mediaLocationKeysWithinRadius.contains(key)) {
+//                        mediaLocationKeysWithinRadius.add(key);
+//                    }
+                    mediaLocationKeysWithinRadius.add(key);
+
+                }
+                @Override
+                public void onKeyExited(String key) {
+
+                }
+
+                @Override
+                public void onKeyMoved(String key, GeoLocation location) {
+
+                }
+
+                @Override
+                public void onGeoQueryReady() {
+
+                }
+
+                @Override
+                public void onGeoQueryError(DatabaseError error) {
+                    Log.i("GeoQueryError:", error.toString());
+                }
+            });
+        }
+        else {
+            // last location is null
+            Log.i("LOCATION", "last location null)");
+        }
+
+        // TODO: FILTER: BLOCK LIST
 
         long currentTimeInMilliseconds = System.currentTimeMillis();
-        long twentyFourHoursInMilliseconds = 86400000;
-        long startTime = currentTimeInMilliseconds - twentyFourHoursInMilliseconds;
+        long startTime = currentTimeInMilliseconds - Constants.twentyFourHoursInMilliseconds;
         long endTime = currentTimeInMilliseconds;
-        long monthStartTime = currentTimeInMilliseconds - (twentyFourHoursInMilliseconds * 31);
+        long monthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31);
+
+        // TODO: FILTER: GENDER
 
         // custom query (set to one month currently)
         Query twentyFourHourqueryRef = Constants.MEDIA_INFO_REF.orderByChild("timestamp").startAt(monthStartTime).endAt(endTime);
@@ -159,6 +220,8 @@ public class MeetActivity extends AppCompatActivity {
 //                        dataSnapshot.getValue();
 
                 ArrayList<Media_Info> newItems = new ArrayList<Media_Info>();
+                ArrayList<String> newItemsTitles = new ArrayList<String>();
+
 
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     String name = (String)child.child("name").getValue();
@@ -182,22 +245,54 @@ public class MeetActivity extends AppCompatActivity {
                     long age = (Long)child.child("age").getValue();
 
                     Media_Info mediaInfoDic = new Media_Info(age, gender, mediaID, name, title, userID, timestamp);
-                    newItems.add(mediaInfoDic);
-                    mediaIntroQueueList = newItems;
+                    // continue filter list by geographical radius:
+                    //  key is found in the array of local mediaID from circleQuery
 
+                    if (mediaLocationKeysWithinRadius.contains(mediaID)) {
+
+                        Log.i("media within radius: ", mediaID);
+                        newItems.add(mediaInfoDic);
+                        newItemsTitles.add(title);
+
+                        }
+                    else {
+                        Log.i("media not in radius: ", mediaID);
                     }
-
-                // get title strings from newItems array and put into array<String> for listView adapter
-                for (Media_Info media : newItems) {
-                    mediaIntroQueueListTitles.add(media.getTitle());
                 }
+
+                mediaIntroQueueList = newItems;
+                mediaIntroQueueListTitles = newItemsTitles;
+
                 stringAdapter.notifyDataSetChanged();
+
+                Log.i("ARRAY", mediaIntroQueueListTitles.toString());
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+    }
+    private void getUserLocation() {
+
+        // get user location
+        Constants.geoFireUsers.getLocation(Constants.userID, new LocationCallback() {
+            @Override
+            public void onLocationResult(String key, GeoLocation location) {
+                if (location != null) {
+                    System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
+                    lastLocation = location;
+                } else {
+                    System.out.println(String.format("There is no location for key %s in GeoFire", key));
+                    // TODO: request location permission
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.err.println("There was an error getting the GeoFire location: " + databaseError);
             }
         });
     }
