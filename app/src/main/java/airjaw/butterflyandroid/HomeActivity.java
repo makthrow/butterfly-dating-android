@@ -157,6 +157,7 @@ public class HomeActivity extends AppCompatActivity implements
         }
         // granted
         else {
+            Log.i("PERMISSION", "onConnected: Granted");
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
 
@@ -205,7 +206,7 @@ public class HomeActivity extends AppCompatActivity implements
     public void onLocationChanged(Location location) {
         GeoLocation newLocation = new GeoLocation(location.getLatitude(), location.getLongitude());
 
-        Constants.geoFireUsers.setLocation(Constants.userID, new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude()));
+        Constants.geoFireUsers.setLocation(Constants.userID, newLocation);
         // set global
         GeoFireGlobal.getInstance().setLastLocation(newLocation);
 

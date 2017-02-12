@@ -61,6 +61,7 @@ public class MeetActivity extends AppCompatActivity {
                 mediaIntroQueueListTitles);
         mediaList.setAdapter(stringAdapter);
 
+
         mediaList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -81,9 +82,12 @@ public class MeetActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        Log.i("ACTIVITY", "onStart");
+
         getUserLocation();
 
         getLocalIntroductions();
+
     }
 
     private void playVideoAtCell(int cellNumber){
