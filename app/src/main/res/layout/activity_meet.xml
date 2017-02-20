@@ -33,5 +33,55 @@
 
     </LinearLayout>
 
+    <RelativeLayout android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <VideoView
+            android:id="@+id/myVideo"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_centerInParent="true"
+            android:visibility="invisible"
+            />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible"
+                android:id="@+id/buttonOverlay"
+                >
+
+                <Button
+                    android:id="@+id/meetButton"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:background="@drawable/ok_75"
+                    android:onClick="sendMeet"/>
+
+                <Button
+                    android:id="@+id/passButton"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:background="@drawable/cancel_75"
+                    android:onClick="closeVideo"/>
+
+
+                <Button
+                    android:id="@+id/reportButton"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/flag_2_25"
+                    android:onClick="showReportAction"/>
+
+             </RelativeLayout>
+
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

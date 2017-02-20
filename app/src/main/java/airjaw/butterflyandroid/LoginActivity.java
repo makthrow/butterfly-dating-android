@@ -13,7 +13,10 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -23,6 +26,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.json.JSONObject;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -37,6 +42,8 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseUser mFirebaseUser;
 
+    private AccessToken token;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         info = (TextView)findViewById(R.id.info);
         loginButton = (LoginButton)findViewById(R.id.login_button);
-        loginButton.setReadPermissions("public_profile, email");
+        loginButton.setReadPermissions("public_profile", "email", "user_friends", "user_education_history", "user_birthday");
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -66,11 +73,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 // get an access token for the signed-in user, exchange it for a Firebase credential,
                 // and authenticate with Firebase using the Firebase credential:
-
-                AccessToken token = loginResult.getAccessToken();
+                token = loginResult.getAccessToken();
                 handleFacebookAccessToken(token);
-
-                loggedInTransition();
 
             }
 
@@ -109,11 +113,8 @@ public class LoginActivity extends AppCompatActivity {
                     String uid = mFirebaseUser.getUid();
                     Log.i("debug", uid);
 
-                    //TODO: upload info to firebase db
-
-
-                    // transition to home screen
                     loggedInTransition();
+
 
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -167,8 +168,15 @@ public class LoginActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                         }
 
+                        else {
+
+                        }
+
+
                         // ...
                     }
                 });
     }
+
+
 }

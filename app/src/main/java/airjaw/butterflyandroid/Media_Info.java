@@ -1,5 +1,10 @@
 package airjaw.butterflyandroid;
 
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.ServerValue;
+
+import java.util.Map;
+
 /**
  * Created by airjaw on 2/9/17.
  */
@@ -11,14 +16,15 @@ public class Media_Info {
     private String name;
     private String title;
     private String userID;
-    private long timestamp;
     private long age;
+
+    Object timestamp;
 
     public Media_Info() {
         // Default constructor required for calls to DataSnapshot.getValue(Media_Info.class)
     }
 
-    public Media_Info(long age, String gender, String mediaID, String name, String title, String userID, long timestamp) {
+    public Media_Info(long age, String gender, String mediaID, String name, String title, String userID) {
 
         this.age = age;
         this.gender = gender;
@@ -26,8 +32,9 @@ public class Media_Info {
         this.name = name;
         this.title = title;
         this.userID = userID;
-        this.timestamp = timestamp;
+        timestamp = ServerValue.TIMESTAMP;
     }
+
 
     public long getAge() {
         return age;
@@ -77,12 +84,13 @@ public class Media_Info {
         this.userID = userID;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    @Exclude
+    public long getTimestampLong() {
+        return (long)timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    public void setTimestamp(Object timestamp) {
+        this.timestamp = (long)timestamp;
     }
 
 }

@@ -17,8 +17,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -28,9 +30,13 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
+import airjaw.butterflyandroid.Camera.CamActivity;
+
 
 public class HomeActivity extends AppCompatActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+
+    private static final String TAG = "HomeActivity";
 
     private GoogleApiClient mGoogleApiClient;
     private LocationServices locationClient;
@@ -45,7 +51,11 @@ public class HomeActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        AccessToken token = AccessToken.getCurrentAccessToken();
+        FacebookSDKMethods.getUserInfoFromFacebook(token, this);
+
         initLocation();
+
     }
 
     @Override
@@ -182,6 +192,7 @@ public class HomeActivity extends AppCompatActivity implements
         switch (requestCode) {
             case Constants.PERMISSION_ACCESS_COARSE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i("HomeActivity", "permission granted");
                     // All good!
                 } else {
                     Toast.makeText(this, "Need your location!", Toast.LENGTH_SHORT).show();
@@ -204,6 +215,7 @@ public class HomeActivity extends AppCompatActivity implements
     // LocationListener
     @Override
     public void onLocationChanged(Location location) {
+        Log.i("HomeActivity", "onLocationChanged");
         GeoLocation newLocation = new GeoLocation(location.getLatitude(), location.getLongitude());
 
         Constants.geoFireUsers.setLocation(Constants.userID, newLocation);
@@ -213,4 +225,8 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
 
+    public void startRecording(View view) {
+        Intent camIntent = new Intent(this, CamActivity.class);
+        startActivity(camIntent);
+    }
 }

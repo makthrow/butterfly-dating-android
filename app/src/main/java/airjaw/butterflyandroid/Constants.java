@@ -72,4 +72,8 @@ public class Constants {
 
 
 
+    // Shared Preferences
+    public static final String USER_FBINFO_PREFS = "User_Info_Prefs";
+
+
 }
