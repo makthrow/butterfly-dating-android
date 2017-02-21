@@ -1,5 +1,7 @@
 package airjaw.butterflyandroid;
 
+import com.google.android.gms.vision.face.Face;
+
 /**
  * Created by airjaw on 2/12/17.
  */
@@ -14,6 +16,9 @@ public class Facebook_Info {
     private String birthday;
     private String pictureURL;
 
+    public Facebook_Info() {
+
+    }
     public Facebook_Info(String name, String gender, String first_name, String last_name, String email, String birthday, String pictureURL) {
         this.name = name;
         this.gender = gender;

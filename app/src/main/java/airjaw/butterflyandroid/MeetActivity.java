@@ -330,26 +330,26 @@ public class MeetActivity extends AppCompatActivity {
                 mediaIntroQueueList.clear();
                 mediaIntroQueueListTitles.clear();
 
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    String name = (String)child.child("name").getValue();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String name = (String)snapshot.child("name").getValue();
                     Log.i(TAG, "name: " + name);
 
-                    String gender = (String)child.child("gender").getValue();
+                    String gender = (String)snapshot.child("gender").getValue();
                     Log.i(TAG, "gender: " + gender);
 
-                    String mediaID = (String)child.child("mediaID").getValue();
+                    String mediaID = (String)snapshot.child("mediaID").getValue();
                     Log.i(TAG, "mediaID: " + mediaID);
 
-                    String title = (String)child.child("title").getValue();
+                    String title = (String)snapshot.child("title").getValue();
                     Log.i(TAG, "title: " + title);
 
-                    String userID = (String)child.child("userID").getValue();
+                    String userID = (String)snapshot.child("userID").getValue();
                     Log.i(TAG, "userID: " + userID);
 
-                    long timestamp = (Long)child.child("timestamp").getValue();
+                    long timestamp = (Long)snapshot.child("timestamp").getValue();
                     Log.i(TAG, "timestamp: " + timestamp);
 
-                    long age = (Long)child.child("age").getValue();
+                    long age = (Long)snapshot.child("age").getValue();
 
                     Media_Info mediaInfoDic = new Media_Info(age, gender, mediaID, name, title, userID);
                     mediaInfoDic.setTimestamp(timestamp);

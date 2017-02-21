@@ -9,12 +9,17 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.vision.face.Face;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,8 +74,6 @@ public class FirebaseMethods {
                 uploadVideoInfoToDatabase(title, mediaID, context);
             }
         });
-
-
     }
 
     public static void uploadVideoToMeetMedia(URL videoURL, String title, String toUserID, String currentMediaTypeToUpload) {
@@ -119,7 +122,7 @@ public class FirebaseMethods {
         // new entry in /users/userID/chats_with_users  -> userID
         DatabaseReference userChatsWithUsersRef = userIDRef.child("chats_with_users");
         HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put("matchedUserID", true);
+        map.put(matchedUserID, true);
         userChatsWithUsersRef.setValue(map);
 
         // ------------------------------------------------
@@ -130,8 +133,126 @@ public class FirebaseMethods {
         DatabaseReference withUserChatsRef = withUserIDRef.child("chats");
         DatabaseReference withUserNewChatIDRef = withUserChatsRef.child(newChatID);
         withUserNewChatIDRef.setValue(true);
+        // new entry in /users/userID/chats_with_users  -> userID
+        DatabaseReference withUserChatsWithUsersRef = withUserIDRef.child("chats_with_users");
+        HashMap<String, Object> map2 = new HashMap<String, Object>();
+        map2.put(Constants.userID, true);
+        withUserChatsWithUsersRef.setValue(map2);
+
+        createChatsMembersFor(newChatID, Constants.userID, matchedUserID);
+
+//        Date currentDate; //
+        String introductionMessage = "You've met someone new! Let's say hi";
+
+        // need to call this twice. once to create a new chats_meta for each user.
+        createChatsMetaFor(newChatID, introductionMessage, Constants.userID, matchedUserID);
+        createChatsMetaFor(newChatID, introductionMessage, matchedUserID, Constants.userID);
+
+    }
 
 
+    private static void createChatsMembersFor(String chatID, String user1, String user2) {
+        // chats_members
+        DatabaseReference chatsMembersRef = Constants.CHATS_MEMBERS_REF;
+        DatabaseReference newChatsMembersRef = chatsMembersRef.child(chatID);
 
+        HashMap<String, Object> chatsMembersMap = new HashMap<String, Object>();
+        HashMap<String, Boolean> chatsMembersMapData = new HashMap<String, Boolean>();
+        chatsMembersMapData.put(user1, true);
+        chatsMembersMapData.put(user2, true);
+        chatsMembersMap.put("users", chatsMembersMapData);
+
+        /* iOS equivalent for reference
+        chatsMembersDic = [
+            "users" : [
+                user1: true,
+                user2: true
+                ]
+            ]
+        */
+        newChatsMembersRef.setValue(chatsMembersMap);
+    }
+
+    private static void createChatsMetaFor(final String chatID, final String lastMessage, String userID, final String matchedUserID) {
+
+        DatabaseReference chatsMetaUserRef = Constants.CHATS_META_REF.child(userID);
+        final DatabaseReference newChatMetaRef = chatsMetaUserRef.child(chatID);
+
+        if (lastMessage != null) {
+            getUserFacebookInfoFor(matchedUserID, new FirebaseMethodsInterface() {
+                @Override
+                public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
+                    if (fbInfo != null) {
+                        String withUserName = fbInfo.getFirst_name();
+                        String lastSender = "none"; // no last sender upon creation
+                        boolean unread = true;
+                        boolean unsent_notification = true;
+
+                        Log.i(TAG, "withUserName: " + withUserName);
+                        ChatsMeta chatsMetaDic = new ChatsMeta(chatID, lastMessage, matchedUserID,
+                                lastSender, unread, withUserName, unsent_notification);
+                        newChatMetaRef.setValue(chatsMetaDic);
+                    }
+                }
+                @Override
+                public void checkIfUsersAreMatched(boolean matched) {
+
+                }
+            });
+        }
+    }
+
+    private static void getUserFacebookInfoFor(String userID, final FirebaseMethodsInterface callback) {
+        DatabaseReference userIDRef = Constants.USERS_REF.child(userID);
+        DatabaseReference userFacebookInfoRef = userIDRef.child("facebook_info");
+
+        userFacebookInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                Facebook_Info info = dataSnapshot.getValue(Facebook_Info.class);
+                callback.getUsersFBInfoCompleted(info);
+//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+//
+//
+////                    String name = (String)snapshot.child("name").getValue();
+////                    String gender = (String)snapshot.child("gender").getValue();
+////                    String birthday = (String)snapshot.child("birthday").getValue();
+////                    String first_name = (String)snapshot.child("first_name").getValue();
+////                    String last_name = (String)snapshot.child("last_name").getValue();
+////                    String pictureURL = (String)snapshot.child("pictureURL").getValue();
+////                    String email = (String)snapshot.child("email").getValue();
+//
+////                    Facebook_Info FBUserInfoMap = new Facebook_Info(name, gender, first_name, last_name, email, birthday, pictureURL);
+//                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    public static void checkIfMatched(String currentUserID, String withUserID, final FirebaseMethodsInterface callback) {
+        // run a check to see if there is an existing match already in users/currentUseridxxx/chats_with_users/withUserIDxxx
+        DatabaseReference currentUser_UsersRef = Constants.USERS_REF.child(currentUserID);
+        DatabaseReference chats_with_users_ref = currentUser_UsersRef.child("chats_with_users");
+        DatabaseReference chats_with_particular_user_ref = chats_with_users_ref.child(withUserID);
+
+        chats_with_particular_user_ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean exists = dataSnapshot.exists();
+                callback.checkIfUsersAreMatched(exists);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

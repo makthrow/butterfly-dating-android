@@ -9,38 +9,31 @@ import com.google.firebase.database.ServerValue;
 
 public class Meet_Media {
 
-    private String gender;
     private String mediaID;
     private String mediaType;
-    private String name;
     private String title;
     private String toUserID;
-    private String FromUserID;
+    private String fromUserID;
+    private boolean unread;
+    private boolean unsent_notification;
 
     Object timestamp;
 
-    public Meet_Media(String gender, String mediaID, String mediaType, String name, String title, String toUserID, String fromUserID) {
-        this.gender = gender;
+
+    public Meet_Media(String mediaID, String mediaType, String title, String toUserID, String fromUserID, boolean unread, boolean unsent_notification) {
         this.mediaID = mediaID;
+
         this.mediaType = mediaType;
-        this.name = name;
         this.title = title;
         this.toUserID = toUserID;
-        FromUserID = fromUserID;
+        this.fromUserID = fromUserID;
+        this.unread = unread;
+        this.unsent_notification = unsent_notification;
 
         timestamp = ServerValue.TIMESTAMP;
 
     }
 
-
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
 
     public String getMediaID() {
         return mediaID;
@@ -48,14 +41,6 @@ public class Meet_Media {
 
     public void setMediaID(String mediaID) {
         this.mediaID = mediaID;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getTitle() {
@@ -83,11 +68,11 @@ public class Meet_Media {
     }
 
     public String getFromUserID() {
-        return FromUserID;
+        return fromUserID;
     }
 
     public void setFromUserID(String fromUserID) {
-        FromUserID = fromUserID;
+        fromUserID = fromUserID;
     }
 
     @Exclude
@@ -97,5 +82,22 @@ public class Meet_Media {
 
     public void setTimestamp(Object timestamp) {
         this.timestamp = (long)timestamp;
+    }
+
+
+    public boolean isUnread() {
+        return unread;
+    }
+
+    public void setUnread(boolean unread) {
+        this.unread = unread;
+    }
+
+    public boolean isUnsent_notification() {
+        return unsent_notification;
+    }
+
+    public void setUnsent_notification(boolean unsent_notification) {
+        this.unsent_notification = unsent_notification;
     }
 }

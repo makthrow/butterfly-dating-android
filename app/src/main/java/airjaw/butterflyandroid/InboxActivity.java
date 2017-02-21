@@ -1,8 +1,10 @@
 package airjaw.butterflyandroid;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -183,25 +185,34 @@ public class InboxActivity extends AppCompatActivity {
                 meetMediaListTitles.clear();
 
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    String name = (String)child.child("name").getValue();
-                    Log.i(TAG, "name: " + name);
 
-                    String gender = (String)child.child("gender").getValue();
-                    Log.i(TAG, "gender: " + gender);
+                    Log.i("SNAPSHOT", "running through children");
 
                     String mediaID = (String)child.child("mediaID").getValue();
                     Log.i(TAG, "mediaID: " + mediaID);
 
+                    String mediaType = (String)child.child("mediaType").getValue();
+                    Log.i(TAG, "mediaType: " + mediaType);
+
                     String title = (String)child.child("title").getValue();
                     Log.i(TAG, "title: " + title);
 
-                    String userID = (String)child.child("userID").getValue();
-                    Log.i(TAG, "userID: " + userID);
+                    String fromUserID = (String)child.child("fromUserID").getValue();
+                    Log.i(TAG, "fromUserID: " + fromUserID);
+
+                    String toUserID = (String)child.child("toUserID").getValue();
+                    Log.i(TAG, "toUserID: " + toUserID);
+
+                    boolean unread = (boolean)child.child("unread").getValue();
+                    Log.i(TAG, "unread: " + unread);
+
+                    boolean unsent_notification = (boolean)child.child("unsent_notification").getValue();
+                    Log.i(TAG, "unsent_notification: " + unsent_notification);
 
                     long timestamp = (Long)child.child("timestamp").getValue();
                     Log.i(TAG, "timestamp: " + timestamp);
 
-                    Meet_Media newMeetMedia = new Meet_Media(gender, mediaID, name, title, userID);
+                    Meet_Media newMeetMedia = new Meet_Media(mediaID, mediaType, title, toUserID, fromUserID, unread, unsent_notification);
                     newMeetMedia.setTimestamp(timestamp);
 
                     meetMedia.add(newMeetMedia);
@@ -274,22 +285,36 @@ public class InboxActivity extends AppCompatActivity {
     public void meetPerson(View view) {
         Log.i(TAG, "Meet Button Clicked");
 
-        String currentUserID = Constants.userID;
-        String fromUserID = userIDFromMatch(selectedUserAtIndexPath);
+        final String currentUserID = Constants.userID;
+        final String fromUserID = userIDFromMatch(selectedUserAtIndexPath);
 
         // check if matched
+        FirebaseMethods.checkIfMatched(currentUserID, fromUserID, new FirebaseMethodsInterface() {
+            @Override
+            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
 
-        // if not
-        Map newMatchDic = setupNewMatchToSave(fromUserID, currentUserID);
-        if (newMatchDic != null) {
-            // have all the necessary info, setup a new chat
-            FirebaseMethods.setupNewChatWith(fromUserID);
-            showMeetPersonAlert();
-        }
-        else {
-            // show error alert
-            showErrorMatchAlert();
-        }
+            }
+            @Override
+            public void checkIfUsersAreMatched(boolean matched) {
+                if (matched) {
+                    String reason = "Already Matched";
+                    showErrorMatchAlert(reason);
+                }
+                else {
+
+                    Map newMatchDic = setupNewMatchToSave(fromUserID, currentUserID);
+                    if (newMatchDic != null) {
+                        // have all the necessary info, setup a new chat
+                        FirebaseMethods.setupNewChatWith(fromUserID);
+                        showMeetPersonAlert();
+                    }
+                    else {
+                        // show error alert
+                        showErrorMatchAlert(null);
+                    }
+                }
+            }
+        });
 
     }
 
@@ -297,6 +322,7 @@ public class InboxActivity extends AppCompatActivity {
         String fromUserID = meetMedia.get(selectedUserAtIndexPath).getFromUserID();
         return fromUserID;
     }
+
     public Map<String, Object> setupNewMatchToSave (final String fromUserID, final String userID){
         if ((fromUserID != null) && (userID != null)) {
             /*
@@ -318,10 +344,45 @@ public class InboxActivity extends AppCompatActivity {
         }
         return null;
     }
+
     public void showMeetPersonAlert() {
+        String title = "You've Matched! Say Hello?";
+
+        AlertDialog alertDialog = new AlertDialog.Builder(InboxActivity.this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(null);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Chat Now",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        // TODO: take user to ChatActivity
+                    }
+                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Later",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
 
     }
-    public void showErrorMatchAlert() {
+    public void showErrorMatchAlert(String reason) {
+        String title = "Error Matching";
+        String message = "We ran into an error matching you two. Sorry!";
+        if (reason.equals("Already Matched")); {
+            message = "You're already matched! Go say Hi";
+        }
 
+        AlertDialog alertDialog = new AlertDialog.Builder(InboxActivity.this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 }
