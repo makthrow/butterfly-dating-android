@@ -9,7 +9,6 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.vision.face.Face;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -18,11 +17,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.net.URL;
-import java.util.Date;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -71,16 +66,49 @@ public class FirebaseMethods {
                 Log.i(TAG, "upload FBStorage success: " + mediaID);
 
                 // if SUCCESS in upload to FIREBASE STORAGE, upload video info to FIREBASE DATABASE
-                uploadVideoInfoToDatabase(title, mediaID, context);
+                uploadMediaInfoToDatabase(title, mediaID, context);
             }
         });
     }
 
-    public static void uploadVideoToMeetMedia(URL videoURL, String title, String toUserID, String currentMediaTypeToUpload) {
+    public static void uploadVideoToMeetMedia(Uri videoURL, final String title, final String toUserID, final String currentMediaTypeToUpload, final Context context) {
+        // generate a timestamp
+        long currentTimeInMilliseconds = System.currentTimeMillis();
+        String videoTimeStamp = Long.toString(currentTimeInMilliseconds / 1000);
+
+        // combine the two to form a unique video ID of userID + timestamp
+        // use userID of sender.
+        final String mediaID = Constants.userID + "-" + videoTimeStamp;
+        Log.i(TAG, "uploading mediaID: " + mediaID);
+        // -----------FIREBASE STORAGE-----------
+        // upload video file to Firebase storage
+        StorageReference newMediaRef = Constants.storageMediaRef.child(mediaID);
+
+        UploadTask uploadTask = newMediaRef.putFile(videoURL);
+
+        // Register observers to listen for when the download is done or if it fails
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                Log.i(TAG, "upload FBStorage success: " + mediaID);
+
+                // create and upload video info data
+                uploadMeetMediaInfoToDatabase(mediaID, Constants.userID, toUserID, title, currentMediaTypeToUpload);
+
+            }
+        });
 
     }
 
-    private static void uploadVideoInfoToDatabase(String title, String mediaID, Context context) {
+    private static void uploadMediaInfoToDatabase(String title, String mediaID, Context context) {
         GeoFireGlobal.getUserLocation();
         Constants.geoFireMedia.setLocation(mediaID, GeoFireGlobal.getInstance().getLastLocation());
 
@@ -96,10 +124,22 @@ public class FirebaseMethods {
         Log.i("PREFS", Integer.toString(age));
         Log.i("PREFS", gender);
 
-        Media_Info newVideoPost = new Media_Info(age, gender, mediaID, name, title, Constants.userID);
+        Media_Info newMediaInfo = new Media_Info(age, gender, mediaID, name, title, Constants.userID);
 
-        DatabaseReference newVideoPostChild = Constants.MEDIA_INFO_REF.child(mediaID);
-        newVideoPostChild.setValue(newVideoPost);
+        DatabaseReference newMediaInfoChildRef = Constants.MEDIA_INFO_REF.child(mediaID);
+        newMediaInfoChildRef.setValue(newMediaInfo);
+    }
+
+    private static void uploadMeetMediaInfoToDatabase(String mediaID, String userID, String toUserID, String title,
+                                                      String mediaType) {
+        boolean unread = true;
+        boolean unsent_notification = true;
+        Meet_Media newMeetMedia = new Meet_Media(mediaID, mediaType, title, toUserID, Constants.userID, unread, unsent_notification);
+
+        DatabaseReference meetMediaUserRef = Constants.MEET_MEDIA_REF.child(toUserID);
+        DatabaseReference newMeetMediaChildRef = meetMediaUserRef.child(mediaID);
+        newMeetMediaChildRef.setValue(newMeetMedia);
+
     }
 
     public static void setupNewChatWith(String matchedUserID) {

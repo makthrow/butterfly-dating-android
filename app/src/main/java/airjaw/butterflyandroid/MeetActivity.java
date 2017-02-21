@@ -1,11 +1,15 @@
 package airjaw.butterflyandroid;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -44,6 +48,8 @@ import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.VideoView;
 
+import airjaw.butterflyandroid.Camera.CamSendMeetActivity;
+
 public class MeetActivity extends AppCompatActivity {
 
     private static final String TAG = "MeetActivity";
@@ -56,6 +62,8 @@ public class MeetActivity extends AppCompatActivity {
     GeoLocation lastLocation;
     VideoView vidView;
     RelativeLayout buttonOverlay;
+
+    int selectedUserAtIndexPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +91,8 @@ public class MeetActivity extends AppCompatActivity {
                 Media_Info mediaSelected = mediaIntroQueueList.get(position);
                 Log.i(TAG, "title: " + mediaSelected.getTitle());
                 Log.i(TAG, "mediaID: " + mediaSelected.getMediaID());
+
+                selectedUserAtIndexPath = position;
 
                 playVideoAtCell(position);
             }
@@ -315,7 +325,11 @@ public class MeetActivity extends AppCompatActivity {
         long endTime = currentTimeInMilliseconds;
         long monthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31);
 
-        // TODO: FILTER: GENDER
+        // GENDER FILTER
+        Context context = this;
+        SharedPreferences settingsPrefs = context.getSharedPreferences(Constants.USER_SETTINGS_PREFS, MODE_PRIVATE);
+        final boolean showMen = settingsPrefs.getBoolean("meetMenSwitch", false);
+        final boolean showWomen = settingsPrefs.getBoolean("meetWomenSwitch", false);
 
         // custom query (set to one month currently)
         Query twentyFourHourqueryRef = Constants.MEDIA_INFO_REF.orderByChild("timestamp").startAt(monthStartTime).endAt(endTime);
@@ -350,6 +364,26 @@ public class MeetActivity extends AppCompatActivity {
                     Log.i(TAG, "timestamp: " + timestamp);
 
                     long age = (Long)snapshot.child("age").getValue();
+
+                    if (showMen && showWomen) {
+                        // show all users
+                    }
+                    else if (!showMen && !showWomen) {
+                        // show all users
+                    }
+                    else if (userID.equals(Constants.userID)) {
+                        // always show user's own intro
+                    }
+                    else if (!showMen && showWomen) {
+                        if (gender.equals("male")) {
+                            continue; // exit loop for this child
+                        }
+                    }
+                    else if (showMen && !showWomen) {
+                        if (gender.equals("female")) {
+                            continue; // exit loop for this child
+                        }
+                    }
 
                     Media_Info mediaInfoDic = new Media_Info(age, gender, mediaID, name, title, userID);
                     mediaInfoDic.setTimestamp(timestamp);
@@ -420,6 +454,38 @@ public class MeetActivity extends AppCompatActivity {
 
     public void sendMeet(View view) {
         Log.i(TAG, "Meet Button Clicked");
-        // open CamActivity
+
+        String toUserID = mediaIntroQueueList.get(selectedUserAtIndexPath).getUserID();
+
+        if (toUserID != Constants.userID) {
+            // currentlyPlayingVideo = false;
+
+            // open CamSendMeetActivity
+            Intent camIntent = new Intent(this, CamSendMeetActivity.class);
+            camIntent.putExtra("toUserID", toUserID);
+            startActivity(camIntent);
+        }
+        else {
+            String reason = "Self Meet";
+            showMeetErrorAlert(reason);
+        }
+
+    }
+    private void showMeetErrorAlert(String reason) {
+        String title = "Error";
+        String message = "We ran into an error";
+        if (reason.equals("Self Meet")){
+            message = "You can't meet yourself!";
+        }
+        AlertDialog alertDialog = new AlertDialog.Builder(MeetActivity.this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Aww, OK...",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 }

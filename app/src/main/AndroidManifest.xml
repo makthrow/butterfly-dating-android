@@ -44,6 +44,8 @@
             android:value="@string/facebook_app_id" />
 
         <activity android:name=".Camera.CamActivity"></activity>
+        <activity android:name=".Camera.CamSendMeetActivity"></activity>
+
     </application>
 
 </manifest>

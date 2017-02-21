@@ -73,7 +73,8 @@ public class Constants {
 
 
     // Shared Preferences
-    public static final String USER_FBINFO_PREFS = "User_Info_Prefs";
+    public static final String USER_FBINFO_PREFS = "com.ajk.butterfly.User_Info_Prefs";
 
+    public static final String USER_SETTINGS_PREFS = "com.ajk.butterfly.User_Settings_Prefs";
 
 }

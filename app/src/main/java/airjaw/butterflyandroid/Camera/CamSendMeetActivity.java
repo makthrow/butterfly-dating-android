@@ -1,54 +1,13 @@
-
 package airjaw.butterflyandroid.Camera;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.hardware.Camera;
-import android.media.CamcorderProfile;
-import android.media.MediaRecorder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.SystemClock;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.Chronometer;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -57,9 +16,11 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -71,8 +32,11 @@ import java.io.IOException;
 import airjaw.butterflyandroid.FirebaseMethods;
 import airjaw.butterflyandroid.R;
 
-public class CamActivity extends Activity {
+/**
+ * Created by airjaw on 2/21/17.
+ */
 
+public class CamSendMeetActivity extends Activity {
     private Camera mCamera;
     private CamPreview mPreview;
     private MediaRecorder mediaRecorder;
@@ -83,7 +47,7 @@ public class CamActivity extends Activity {
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private static final int RC_HANDLE_WRITE_EXTERNAL_STORAGE_PERM = 3;
     private static final int RC_HANDLE_RECORD_AUDIO_PERM = 4;
-    private String TAG = "CamActivity";
+    private String TAG = "CamSendMeetActivity";
     private TextView mTimerTv;
     private String filePath;
     private Intent intent;
@@ -92,6 +56,7 @@ public class CamActivity extends Activity {
 
     private Uri fileToUploadURL;
     private String uploadMediaTitle;
+    private String toUserID;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,9 +66,13 @@ public class CamActivity extends Activity {
         myContext = this;
         mTimerTv = (TextView) findViewById(R.id.tvTimer);
 
+        Intent intent = getIntent();
+        toUserID = intent.getStringExtra("toUserID");
+        Log.i(TAG, "toUserID: " + toUserID);
+
         File mediaFile =
                 new File(Environment.getExternalStorageDirectory().getAbsolutePath()
-                        + "/testVideo.mp4");
+                        + "/sendMeetCamVideo.mp4");
         filePath = Uri.fromFile(mediaFile).getPath();
         fileToUploadURL = Uri.fromFile(mediaFile);
         intent   = getIntent();
@@ -133,9 +102,9 @@ public class CamActivity extends Activity {
         // Search for the front facing camera
         int numberOfCameras = Camera.getNumberOfCameras();
         for (int i = 0; i < numberOfCameras; i++) {
-            CameraInfo info = new CameraInfo();
+            Camera.CameraInfo info = new Camera.CameraInfo();
             Camera.getCameraInfo(i, info);
-            if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+            if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 cameraId = i;
                 cameraFront = true;
                 break;
@@ -151,9 +120,9 @@ public class CamActivity extends Activity {
         int numberOfCameras = Camera.getNumberOfCameras();
         // for every camera check
         for (int i = 0; i < numberOfCameras; i++) {
-            CameraInfo info = new CameraInfo();
+            Camera.CameraInfo info = new Camera.CameraInfo();
             Camera.getCameraInfo(i, info);
-            if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
+            if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 cameraId = i;
                 cameraFront = false;
                 break;
@@ -175,14 +144,6 @@ public class CamActivity extends Activity {
     }
 
     private void initializeCamera() {
-//        try {
-//            mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
-//            mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
-//
-//        } catch (Exception e) {
-//            Log.e(getString(R.string.app_name), "failed to open Camera");
-//            e.printStackTrace();
-//        }
 
         if (mCamera == null) {
             // if the front facing camera does not exist
@@ -209,7 +170,7 @@ public class CamActivity extends Activity {
         capture.setSelected(true);
     }
 
-    OnClickListener switchCameraListener = new OnClickListener() {
+    View.OnClickListener switchCameraListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             // get the number of cameras
@@ -273,7 +234,7 @@ public class CamActivity extends Activity {
     }
 
     boolean recording = false;
-    OnClickListener captureListener = new OnClickListener() {
+    View.OnClickListener captureListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (recording) {
@@ -282,7 +243,7 @@ public class CamActivity extends Activity {
 
             } else {
                 if (!prepareMediaRecorder()) {
-                    Toast.makeText(CamActivity.this, "Fail in prepareMediaRecorder()!\n - Ended -", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CamSendMeetActivity.this, "Fail in prepareMediaRecorder()!\n - Ended -", Toast.LENGTH_LONG).show();
                     finish();
                 }
                 // work on UiThread for better performance
@@ -360,7 +321,7 @@ public class CamActivity extends Activity {
         Log.w(CamActivity.class.getName(), "Camera permission is not granted. Requesting permission");
 
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
-        ActivityCompat.requestPermissions(CamActivity.this, permissions,
+        ActivityCompat.requestPermissions(CamSendMeetActivity.this, permissions,
                 RC_HANDLE_CAMERA_PERM);
 
     }
@@ -369,7 +330,7 @@ public class CamActivity extends Activity {
         Log.w(CamActivity.class.getName(), "SDCard permission is not granted. Requesting permission");
 
         final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        ActivityCompat.requestPermissions(CamActivity.this, permissions,
+        ActivityCompat.requestPermissions(CamSendMeetActivity.this, permissions,
                 RC_HANDLE_WRITE_EXTERNAL_STORAGE_PERM);
 
     }
@@ -378,7 +339,7 @@ public class CamActivity extends Activity {
         Log.w(CamActivity.class.getName(), "Record audio permission is not granted. Requesting permission");
 
         final String[] permissions = new String[]{Manifest.permission.RECORD_AUDIO};
-        ActivityCompat.requestPermissions(CamActivity.this, permissions,
+        ActivityCompat.requestPermissions(CamSendMeetActivity.this, permissions,
                 RC_HANDLE_RECORD_AUDIO_PERM);
 
     }
@@ -460,8 +421,7 @@ public class CamActivity extends Activity {
     }
 
     private void presentAddCommentAlert() {
-        // uploadVideoToMediaInfo
-        uploadMediaTitle = "test title"; // TODO: implement real title by user
+        uploadMediaTitle = "no title";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Title");
@@ -479,8 +439,8 @@ public class CamActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 uploadMediaTitle = input.getText().toString();
-                FirebaseMethods.uploadVideoToMediaInfo(fileToUploadURL, uploadMediaTitle, CamActivity.this);
-
+                String mediaType = "video";
+                FirebaseMethods.uploadVideoToMeetMedia(fileToUploadURL, uploadMediaTitle, toUserID, mediaType, CamSendMeetActivity.this);
             }
         });
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -492,14 +452,13 @@ public class CamActivity extends Activity {
 
         builder.show();
 
-
     }
 
     private void didFinishRecording() {
         // stop recording and release camera
         mediaRecorder.stop(); // stop the recording
         releaseMediaRecorder(); // release the MediaRecorder object
-        Toast.makeText(CamActivity.this, "Video captured!", Toast.LENGTH_LONG).show();
+        Toast.makeText(CamSendMeetActivity.this, "Video captured!", Toast.LENGTH_LONG).show();
         capture.setSelected(true);
         recording = false;
 
