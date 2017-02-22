@@ -95,11 +95,7 @@ public class FacebookSDKMethods {
 
                                     @Override
                                     public void onComplete(Bitmap result) {
-                                        /* save the image - I'm gonna use JPEG */
                                         final Bitmap.CompressFormat mFormat = Bitmap.CompressFormat.JPEG;
-                                        /* don't forget to include the extension into the file name */
-//                                        final File myImageFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-//                                                File.separator + "image_test" + File.separator + TAG + "." + mFormat.name().toLowerCase());
 
                                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                                         result.compress(mFormat, 100, outputStream);
@@ -123,46 +119,6 @@ public class FacebookSDKMethods {
                                     }
                                 });
                                 downloader.download(urlString, true);
-
-                                // upload from bytes
-//
-//                                final ImageView fbProfileImageView = new ImageView(context);
-//                                Picasso.with(context).load(urlString).into(fbProfileImageView, new Callback() {
-//                                    @Override
-//                                    public void onSuccess() {
-//
-//                                        fbProfileImageView.setDrawingCacheEnabled(true);
-//                                        fbProfileImageView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-//                                        fbProfileImageView.layout(0, 0, fbProfileImageView.getMeasuredWidth(), fbProfileImageView.getMeasuredHeight());
-//                                        fbProfileImageView.buildDrawingCache();
-//                                        Bitmap bitmap = Bitmap.createBitmap(fbProfileImageView.getDrawingCache());
-//
-//                                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//                                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-//                                        byte[] data = outputStream.toByteArray();
-//
-//                                        UploadTask uploadTask = profilePicStorageRef.putBytes(data);
-//                                        uploadTask.addOnFailureListener(new OnFailureListener() {
-//                                            @Override
-//                                            public void onFailure(@NonNull Exception exception) {
-//                                                // Handle unsuccessful uploads
-//                                                Log.i(TAG, "FBStorage upload profile pic exception: " + exception.toString());
-//                                            }
-//                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                                            @Override
-//                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                                                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-//                                                Uri downloadUrl = taskSnapshot.getDownloadUrl();
-//                                                Log.i(TAG, "Fb profile pic successfully uploaded");
-//                                            }
-//                                        });
-//                                    }
-//
-//                                    @Override
-//                                    public void onError() {
-//
-//                                    }
-//                                });
 
                                 // save basic settings in shared preferences: age, gender, first name
 
