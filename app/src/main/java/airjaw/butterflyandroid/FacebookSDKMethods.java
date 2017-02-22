@@ -7,10 +7,12 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookRequestError;
@@ -34,11 +36,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import static android.R.attr.bitmap;
 import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by airjaw on 2/12/17.
  */
+
+// bitmap BasicImageDownloader example code here:
+// https://github.com/vad-zuev/ImageDownloader/blob/master/app/src/main/java/com/so/example/activities/ImageActivity.java
 
 public class FacebookSDKMethods {
     private static final String TAG = "FacebookSDKMethods";
@@ -75,21 +81,28 @@ public class FacebookSDKMethods {
 
                                 final StorageReference profilePicStorageRef = Constants.storageFBProfilePicRef.child(Constants.userID);
 
-                                // upload from bytes
-
-                                final ImageView fbProfileImageView = new ImageView(context);
-                                Picasso.with(context).load(urlString).into(fbProfileImageView, new Callback() {
+                                final BasicImageDownloader downloader = new BasicImageDownloader(new BasicImageDownloader.OnImageLoaderListener() {
                                     @Override
-                                    public void onSuccess() {
+                                    public void onError(BasicImageDownloader.ImageError error) {
+                                        Toast.makeText(context, "Error code " + error.getErrorCode() + ": " +
+                                                error.getMessage(), Toast.LENGTH_LONG).show();
+                                        error.printStackTrace();
 
-                                        fbProfileImageView.setDrawingCacheEnabled(true);
-                                        fbProfileImageView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-                                        fbProfileImageView.layout(0, 0, fbProfileImageView.getMeasuredWidth(), fbProfileImageView.getMeasuredHeight());
-                                        fbProfileImageView.buildDrawingCache();
-                                        Bitmap bitmap = Bitmap.createBitmap(fbProfileImageView.getDrawingCache());
+                                    }
+                                    @Override
+                                    public void onProgressChange(int percent) {
+                                    }
+
+                                    @Override
+                                    public void onComplete(Bitmap result) {
+                                        /* save the image - I'm gonna use JPEG */
+                                        final Bitmap.CompressFormat mFormat = Bitmap.CompressFormat.JPEG;
+                                        /* don't forget to include the extension into the file name */
+//                                        final File myImageFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+//                                                File.separator + "image_test" + File.separator + TAG + "." + mFormat.name().toLowerCase());
 
                                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                                        result.compress(mFormat, 100, outputStream);
                                         byte[] data = outputStream.toByteArray();
 
                                         UploadTask uploadTask = profilePicStorageRef.putBytes(data);
@@ -108,12 +121,48 @@ public class FacebookSDKMethods {
                                             }
                                         });
                                     }
-
-                                    @Override
-                                    public void onError() {
-
-                                    }
                                 });
+                                downloader.download(urlString, true);
+
+                                // upload from bytes
+//
+//                                final ImageView fbProfileImageView = new ImageView(context);
+//                                Picasso.with(context).load(urlString).into(fbProfileImageView, new Callback() {
+//                                    @Override
+//                                    public void onSuccess() {
+//
+//                                        fbProfileImageView.setDrawingCacheEnabled(true);
+//                                        fbProfileImageView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+//                                        fbProfileImageView.layout(0, 0, fbProfileImageView.getMeasuredWidth(), fbProfileImageView.getMeasuredHeight());
+//                                        fbProfileImageView.buildDrawingCache();
+//                                        Bitmap bitmap = Bitmap.createBitmap(fbProfileImageView.getDrawingCache());
+//
+//                                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//                                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+//                                        byte[] data = outputStream.toByteArray();
+//
+//                                        UploadTask uploadTask = profilePicStorageRef.putBytes(data);
+//                                        uploadTask.addOnFailureListener(new OnFailureListener() {
+//                                            @Override
+//                                            public void onFailure(@NonNull Exception exception) {
+//                                                // Handle unsuccessful uploads
+//                                                Log.i(TAG, "FBStorage upload profile pic exception: " + exception.toString());
+//                                            }
+//                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                                            @Override
+//                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                                                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+//                                                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+//                                                Log.i(TAG, "Fb profile pic successfully uploaded");
+//                                            }
+//                                        });
+//                                    }
+//
+//                                    @Override
+//                                    public void onError() {
+//
+//                                    }
+//                                });
 
                                 // save basic settings in shared preferences: age, gender, first name
 
