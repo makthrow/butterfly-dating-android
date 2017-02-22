@@ -54,6 +54,9 @@ dependencies {
     // for dates and times
     compile 'net.danlew:android.joda:2.9.5.1'
 
+    compile 'com.google.android.exoplayer:exoplayer:r2.2.0'
+
+
 }
 
 

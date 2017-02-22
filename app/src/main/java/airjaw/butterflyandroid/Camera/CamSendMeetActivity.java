@@ -286,7 +286,7 @@ public class CamSendMeetActivity extends Activity {
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mediaRecorder.setOrientationHint(CamPreview.rotate);
 
-        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_1080P));
+        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
 
         mediaRecorder.setOutputFile(filePath);
         mediaRecorder.setMaxDuration(5000); // Set max duration 5 sec.

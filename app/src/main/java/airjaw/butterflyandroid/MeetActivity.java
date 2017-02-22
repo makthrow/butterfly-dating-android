@@ -28,6 +28,24 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.firebase.geofire.LocationCallback;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -60,8 +78,9 @@ public class MeetActivity extends AppCompatActivity {
     ListView mediaList;
 
     GeoLocation lastLocation;
-    VideoView vidView;
     RelativeLayout buttonOverlay;
+    SimpleExoPlayerView simpleExoPlayerView;
+    SimpleExoPlayer simpleExoPlayer;
 
     int selectedUserAtIndexPath;
 
@@ -97,66 +116,10 @@ public class MeetActivity extends AppCompatActivity {
                 playVideoAtCell(position);
             }
         });
-        vidView = (VideoView)findViewById(R.id.myVideo);
-        vidView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                Log.i(TAG, "onPrepared");
-            }
-        });
-        vidView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                Log.i(TAG, "OnCompletion");
-                mp.start();
-            }
-        });
 
+        simpleExoPlayerView = (SimpleExoPlayerView) findViewById(R.id.exoPlayerVideoView);
         buttonOverlay = (RelativeLayout) findViewById(R.id.buttonOverlay);
 
-        // 1 - iPhone - WORKS
-        String testVidPath = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FymjM7mL1sycztRG4E4WSRRqBv9o1-1487019771?alt=media&token=cfcdc7bc-1932-4d74-9856-154dc8c9d9c8";
-
-        // 2 - iPhone - WORKS
-        String testVidPath2 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FCXfmNF9nyjh1cPAKiZza8vtpg8A3-1476847624?alt=media&token=e21066c0-5618-40d8-9081-fc5de96f8511";
-
-        // 3 - iPhone - WORKS
-        String testVidPath3 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FCXfmNF9nyjh1cPAKiZza8vtpg8A3-1476941162?alt=media&token=0f467465-803b-469a-93bf-4f658d2c5570";
-
-        // 4 - iPhone 9mb - WORKS on initial load
-        String testVidPath4 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FhpM9dRDIAAUlCQsAhixWBxOyK9c2-1477696362?alt=media&token=771f412f-b697-406c-af74-f57772e1b13d";
-
-        // 6 - iPhone - WORKS
-        String testVidPath6 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FCXfmNF9nyjh1cPAKiZza8vtpg8A3-1476258706?alt=media&token=d2bb8c75-864c-4a0b-818e-16f33fbfa7ac";
-
-        // 7 - Android - doesn't work
-        String testVidPath7 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FU7QuOvxLW9Xt9OPMFwFgwmz5P1A2-1487467942089?alt=media&token=88d8c32d-e906-4a5b-b057-70468dacbfff";
-
-        // 8 - Android
-        String testVidPath8 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FU7QuOvxLW9Xt9OPMFwFgwmz5P1A2-1487468452056?alt=media&token=c2552611-8dcd-4b62-af99-03bf6b12d158";
-
-        // 9 - Android -
-        String testVidPath9 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FU7QuOvxLW9Xt9OPMFwFgwmz5P1A2-1487470433?alt=media&token=fb9375d7-51ac-4a94-89a8-106a40a845c0";
-
-        // 10 - Android
-        String testVidPath10 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FU7QuOvxLW9Xt9OPMFwFgwmz5P1A2-1487533871?alt=media&token=0a6cc64b-40e2-4ffe-9ce4-5a547c2639af";
-
-        // 11 - Android - doesn't work
-        String testVidPath11 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FU7QuOvxLW9Xt9OPMFwFgwmz5P1A2-1487535121?alt=media&token=5b9c67f0-2d2b-4cd0-9826-4bf77c5c65ba";
-
-        // 12 - Android - doesn't work
-        String testVidPath12 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FU7QuOvxLW9Xt9OPMFwFgwmz5P1A2-1487537118?alt=media&token=333ceaef-7971-4336-8ba8-f01b7d59c5ad";
-
-        // 13 - Android 1080p -
-        String testVidPath13 = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2FU7QuOvxLW9Xt9OPMFwFgwmz5P1A2-1487548888?alt=media&token=56cc9680-407e-4b58-9ef1-725bc1bfb5a7";
-
-        // Android (manually uploaded file) - WORKS
-        String testVidPathManual = "https://firebasestorage.googleapis.com/v0/b/butterfly2-ac0f9.appspot.com/o/media%2F20170219_150854.mp4?alt=media&token=b8d4d76c-8af5-4d78-82f8-1a73bca60bd7";
-
-//        vidView.setVideoPath(testVidPath4);
-//        vidView.setVisibility(View.VISIBLE);
-//        buttonOverlay.setVisibility(View.VISIBLE);
-//        vidView.start();
     }
 
     @Override
@@ -167,7 +130,8 @@ public class MeetActivity extends AppCompatActivity {
 
         getUserLocation();
 
-        getLocalIntroductions();
+//        getLocalIntroductions(); // TODO: change back for production
+        getIntroductionsForAdmin(); // TODO: comment out for production
 
     }
 
@@ -175,32 +139,48 @@ public class MeetActivity extends AppCompatActivity {
 
         getDownloadURL(cellNumber, new MeetActivityInterface() {
             @Override
-            public void downloadURLCompleted(Uri url) {
-
+            public void downloadURLCompleted(Uri uri) {
                 Log.i(TAG, "playVideo");
-//                vidView.setVideoURI(url);
-                vidView.setVideoPath(url.toString()); // this also works
-                Log.i(TAG, "url.toString: " + url.toString());
-                vidView.setVisibility(View.VISIBLE);
-                buttonOverlay.setVisibility(View.VISIBLE);
-                vidView.start();
 
-//                try {
-//                    // Start the MediaController
-//                    MediaController mediacontroller = new MediaController(
-//                            MeetActivity.this);
-//                    mediacontroller.setAnchorView(vidView);
-//                    // Get the URL from String VideoURL
-//                    vidView.setMediaController(mediacontroller);
-//                    vidView.setVideoURI(url);
-//                    vidView.setVisibility(View.VISIBLE);
-//                    buttonOverlay.setVisibility(View.VISIBLE);
-//                    vidView.start();
-//
-//                } catch (Exception e) {
-//                    Log.e("Error", e.getMessage());
-//                    e.printStackTrace();
-//                }
+                simpleExoPlayerView.setVisibility(View.VISIBLE);
+                buttonOverlay.setVisibility(View.VISIBLE);
+
+                // 1. Create a default TrackSelector
+                Handler mainHandler = new Handler();
+                BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+                TrackSelection.Factory videoTrackSelectionFactory =
+                        new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
+                TrackSelector trackSelector =
+                        new DefaultTrackSelector(videoTrackSelectionFactory);
+
+                // 2. Create a default LoadControl
+                LoadControl loadControl = new DefaultLoadControl();
+
+                // 3. Create the player
+                simpleExoPlayer =
+                        ExoPlayerFactory.newSimpleInstance(MeetActivity.this, trackSelector, loadControl);
+
+                // Bind the player to the view.
+                simpleExoPlayerView.setPlayer(simpleExoPlayer);
+
+                // In ExoPlayer every piece of media is represented by MediaSource.
+                // To play a piece of media you must first create a corresponding MediaSource and
+                // then pass this object to ExoPlayer.prepare
+
+                // Produces DataSource instances through which media data is loaded.
+                String userAgent = Util.getUserAgent(MeetActivity.this, "Butterfly");
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(MeetActivity.this,
+                        userAgent);
+
+                // Produces Extractor instances for parsing the media data.
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                // This is the MediaSource representing the media to be played.
+                MediaSource videoSource = new ExtractorMediaSource(uri,
+                        dataSourceFactory, extractorsFactory, null, null);
+                // Prepare the player with the source.
+                simpleExoPlayer.prepare(videoSource);
+                simpleExoPlayer.setPlayWhenReady(true);
+
             }
         });
     }
@@ -321,7 +301,7 @@ public class MeetActivity extends AppCompatActivity {
         long currentTimeInMilliseconds = System.currentTimeMillis();
         System.out.println("currentTimeInMilliseconds:" + currentTimeInMilliseconds);
 
-        long startTime = currentTimeInMilliseconds - Constants.twentyFourHoursInMilliseconds;
+        long twentyFourHoursStartTime = currentTimeInMilliseconds - Constants.twentyFourHoursInMilliseconds;
         long endTime = currentTimeInMilliseconds;
         long monthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31);
 
@@ -332,7 +312,7 @@ public class MeetActivity extends AppCompatActivity {
         final boolean showWomen = settingsPrefs.getBoolean("meetWomenSwitch", false);
 
         // custom query (set to one month currently)
-        Query twentyFourHourqueryRef = Constants.MEDIA_INFO_REF.orderByChild("timestamp").startAt(monthStartTime).endAt(endTime);
+        Query twentyFourHourqueryRef = Constants.MEDIA_INFO_REF.orderByChild("timestamp").startAt(twentyFourHoursStartTime).endAt(endTime);
 
         // Read from the database
         twentyFourHourqueryRef.addValueEventListener(new ValueEventListener() {
@@ -416,6 +396,153 @@ public class MeetActivity extends AppCompatActivity {
         });
     }
 
+    private void getIntroductionsForAdmin() {
+
+        // special method for debugging/testing purposes
+        // extends time filter to a month (or more) and removes location filter
+
+        final ArrayList<String> mediaLocationKeysWithinRadius = new ArrayList<String>();
+
+        lastLocation = GeoFireGlobal.getInstance().getLastLocation();
+
+        if (lastLocation != null) {
+            GeoQuery circleQuery = Constants.geoFireMedia.queryAtLocation(lastLocation, 50);
+
+            circleQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                @Override
+                public void onKeyEntered(String key, GeoLocation location) {
+                    System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+                    Log.i("Query: Key added", key.toString());
+
+                    mediaLocationKeysWithinRadius.add(key);
+
+                }
+                @Override
+                public void onKeyExited(String key) {
+
+                }
+
+                @Override
+                public void onKeyMoved(String key, GeoLocation location) {
+
+                }
+
+                @Override
+                public void onGeoQueryReady() {
+
+                }
+
+                @Override
+                public void onGeoQueryError(DatabaseError error) {
+                    Log.i("GeoQueryError:", error.toString());
+                }
+            });
+        }
+        else {
+            // last location is null
+            Log.i("LOCATION", "last location null)");
+        }
+
+        // TODO: FILTER: BLOCK LIST
+
+        long currentTimeInMilliseconds = System.currentTimeMillis();
+        System.out.println("currentTimeInMilliseconds:" + currentTimeInMilliseconds);
+
+        long startTime = currentTimeInMilliseconds - Constants.twentyFourHoursInMilliseconds;
+        long endTime = currentTimeInMilliseconds;
+        long monthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31);
+        long twoMonthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 61);
+
+
+        // GENDER FILTER
+        Context context = this;
+        SharedPreferences settingsPrefs = context.getSharedPreferences(Constants.USER_SETTINGS_PREFS, MODE_PRIVATE);
+        final boolean showMen = settingsPrefs.getBoolean("meetMenSwitch", false);
+        final boolean showWomen = settingsPrefs.getBoolean("meetWomenSwitch", false);
+
+        // custom query (set to one month currently)
+        Query twentyFourHourqueryRef = Constants.MEDIA_INFO_REF.orderByChild("timestamp").startAt(twoMonthStartTime).endAt(endTime);
+
+        // Read from the database
+        twentyFourHourqueryRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+
+                mediaIntroQueueList.clear();
+                mediaIntroQueueListTitles.clear();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String name = (String)snapshot.child("name").getValue();
+                    Log.i(TAG, "name: " + name);
+
+                    String gender = (String)snapshot.child("gender").getValue();
+                    Log.i(TAG, "gender: " + gender);
+
+                    String mediaID = (String)snapshot.child("mediaID").getValue();
+                    Log.i(TAG, "mediaID: " + mediaID);
+
+                    String title = (String)snapshot.child("title").getValue();
+                    Log.i(TAG, "title: " + title);
+
+                    String userID = (String)snapshot.child("userID").getValue();
+                    Log.i(TAG, "userID: " + userID);
+
+                    long timestamp = (Long)snapshot.child("timestamp").getValue();
+                    Log.i(TAG, "timestamp: " + timestamp);
+
+                    long age = (Long)snapshot.child("age").getValue();
+
+                    if (showMen && showWomen) {
+                        // show all users
+                    }
+                    else if (!showMen && !showWomen) {
+                        // show all users
+                    }
+                    else if (userID.equals(Constants.userID)) {
+                        // always show user's own intro
+                    }
+                    else if (!showMen && showWomen) {
+                        if (gender.equals("male")) {
+                            continue; // exit loop for this child
+                        }
+                    }
+                    else if (showMen && !showWomen) {
+                        if (gender.equals("female")) {
+                            continue; // exit loop for this child
+                        }
+                    }
+
+                    Media_Info mediaInfoDic = new Media_Info(age, gender, mediaID, name, title, userID);
+                    mediaInfoDic.setTimestamp(timestamp);
+                    // continue filter list by geographical radius:
+                    //  key is found in the array of local mediaID from circleQuery
+
+//                    if (mediaLocationKeysWithinRadius.contains(mediaID)) {
+//
+//                        Log.i("media within radius: ", mediaID);
+
+                        mediaIntroQueueList.add(mediaInfoDic);
+                        mediaIntroQueueListTitles.add(title);
+
+                  //  }
+//                    else {
+//                        Log.i("media not in radius: ", mediaID);
+//                    }
+                }
+
+                stringAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+    }
+
     private void getUserLocation() {
 
         // get user location
@@ -446,19 +573,23 @@ public class MeetActivity extends AppCompatActivity {
         Log.i(TAG, "Pass Button Clicked");
         buttonOverlay = (RelativeLayout) findViewById(R.id.buttonOverlay);
 
-        vidView.stopPlayback();
-        vidView.setVisibility(View.INVISIBLE);
+        simpleExoPlayer.stop();
+        simpleExoPlayer.release();
+        simpleExoPlayerView.setVisibility(View.INVISIBLE);
         buttonOverlay.setVisibility(View.INVISIBLE);
-
     }
 
     public void sendMeet(View view) {
-        Log.i(TAG, "Meet Button Clicked");
 
         String toUserID = mediaIntroQueueList.get(selectedUserAtIndexPath).getUserID();
+        Log.i(TAG, "Meet Button Clicked: trying to meet: " +  toUserID);
 
-        if (toUserID != Constants.userID) {
+
+        if (!toUserID.equals(Constants.userID)){
             // currentlyPlayingVideo = false;
+
+            simpleExoPlayer.stop();
+            simpleExoPlayer.release();
 
             // open CamSendMeetActivity
             Intent camIntent = new Intent(this, CamSendMeetActivity.class);

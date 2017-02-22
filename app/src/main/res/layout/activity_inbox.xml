@@ -36,8 +36,8 @@
     <RelativeLayout android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-        <VideoView
-            android:id="@+id/myVideo"
+        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+            android:id="@+id/exoPlayerVideoView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_centerInParent="true"

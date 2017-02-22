@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +22,24 @@ import android.widget.VideoView;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,10 +60,10 @@ public class InboxActivity extends AppCompatActivity {
     private static ArrayList<String> meetMediaListTitles = new ArrayList<>();
     ArrayAdapter<String> stringAdapter;
     ListView mediaList;
-    VideoView vidView;
     RelativeLayout buttonOverlay;
     int selectedUserAtIndexPath;
-
+    SimpleExoPlayerView simpleExoPlayerView;
+    SimpleExoPlayer simpleExoPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,23 +97,11 @@ public class InboxActivity extends AppCompatActivity {
                 playVideoAtCell(position);
             }
         });
-        vidView = (VideoView)findViewById(R.id.myVideo);
-        vidView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                Log.i(TAG, "onPrepared");
-            }
-        });
-        vidView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                Log.i(TAG, "OnCompletion");
-                mp.start();
-            }
-        });
 
         buttonOverlay = (RelativeLayout) findViewById(R.id.buttonOverlay);
+        simpleExoPlayerView = (SimpleExoPlayerView) findViewById(R.id.exoPlayerVideoView);
     }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -238,16 +245,48 @@ public class InboxActivity extends AppCompatActivity {
 
         getDownloadURL(cellNumber, new InboxActivityInterface() {
             @Override
-            public void downloadURLCompleted(Uri url) {
+            public void downloadURLCompleted(Uri uri) {
 
                 Log.i(TAG, "playVideoAtCell");
-//                vidView.setVideoURI(url);
-                vidView.setVideoPath(url.toString()); // this also works
-                Log.i(TAG, "url.toString: " + url.toString());
 
-                vidView.setVisibility(View.VISIBLE);
+                simpleExoPlayerView.setVisibility(View.VISIBLE);
                 buttonOverlay.setVisibility(View.VISIBLE);
-                vidView.start();
+
+                // 1. Create a default TrackSelector
+                Handler mainHandler = new Handler();
+                BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+                TrackSelection.Factory videoTrackSelectionFactory =
+                        new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
+                TrackSelector trackSelector =
+                        new DefaultTrackSelector(videoTrackSelectionFactory);
+
+                // 2. Create a default LoadControl
+                LoadControl loadControl = new DefaultLoadControl();
+
+                // 3. Create the player
+                simpleExoPlayer =
+                        ExoPlayerFactory.newSimpleInstance(InboxActivity.this, trackSelector, loadControl);
+
+                // Bind the player to the view.
+                simpleExoPlayerView.setPlayer(simpleExoPlayer);
+
+                // In ExoPlayer every piece of media is represented by MediaSource.
+                // To play a piece of media you must first create a corresponding MediaSource and
+                // then pass this object to ExoPlayer.prepare
+
+                // Produces DataSource instances through which media data is loaded.
+                String userAgent = Util.getUserAgent(InboxActivity.this, "Butterfly");
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(InboxActivity.this,
+                        userAgent);
+
+                // Produces Extractor instances for parsing the media data.
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                // This is the MediaSource representing the media to be played.
+                MediaSource videoSource = new ExtractorMediaSource(uri,
+                        dataSourceFactory, extractorsFactory, null, null);
+                // Prepare the player with the source.
+                simpleExoPlayer.prepare(videoSource);
+                simpleExoPlayer.setPlayWhenReady(true);
 
             }
         });
@@ -276,10 +315,10 @@ public class InboxActivity extends AppCompatActivity {
         Log.i(TAG, "Pass Button Clicked");
         buttonOverlay = (RelativeLayout) findViewById(R.id.buttonOverlay);
 
-        vidView.stopPlayback();
-        vidView.setVisibility(View.INVISIBLE);
+        simpleExoPlayer.stop();
+        simpleExoPlayer.release();
+        simpleExoPlayerView.setVisibility(View.INVISIBLE);
         buttonOverlay.setVisibility(View.INVISIBLE);
-
     }
 
     public void meetPerson(View view) {
