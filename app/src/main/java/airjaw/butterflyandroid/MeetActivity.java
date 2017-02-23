@@ -86,6 +86,9 @@ public class MeetActivity extends AppCompatActivity {
     private boolean shouldAutoPlay;
     private boolean shouldShowPlaybackControls;
 
+    private int lastVideoPlaying;
+    private boolean shouldResumeVideo;
+
     int selectedUserAtIndexPath;
 
     @Override
@@ -126,6 +129,7 @@ public class MeetActivity extends AppCompatActivity {
 
         shouldAutoPlay = true;
         shouldShowPlaybackControls = false;
+        shouldResumeVideo = false;
 
     }
 
@@ -135,14 +139,21 @@ public class MeetActivity extends AppCompatActivity {
 
         Log.i(TAG, "onStart");
 
-        getUserLocation();
+
+        if (!shouldResumeVideo) {
+
+            getUserLocation();
 
 //        getLocalIntroductions(); // TODO: change back for production
-        getIntroductionsForAdmin(); // TODO: comment out for production
+            getIntroductionsForAdmin(); // TODO: comment out for production
+        }
 
+        else {
+            playVideoAtCell(lastVideoPlaying);
+        }
     }
 
-    private void playVideoAtCell(int cellNumber){
+    private void playVideoAtCell(final int cellNumber){
 
         getDownloadURL(cellNumber, new MeetActivityInterface() {
             @Override
@@ -187,6 +198,8 @@ public class MeetActivity extends AppCompatActivity {
 
                 // Loops the video indefinitely.
                 LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
+
+                lastVideoPlaying = cellNumber;
 
                 // Prepare the player with the source.
 //                simpleExoPlayer.prepare(videoSource); // this doesn't loop
@@ -590,6 +603,8 @@ public class MeetActivity extends AppCompatActivity {
         simpleExoPlayer.release();
         simpleExoPlayerView.setVisibility(View.INVISIBLE);
         buttonOverlay.setVisibility(View.INVISIBLE);
+
+        shouldResumeVideo = false;
     }
 
     public void sendMeet(View view) {
@@ -604,10 +619,14 @@ public class MeetActivity extends AppCompatActivity {
             simpleExoPlayer.stop();
             simpleExoPlayer.release();
 
+            shouldResumeVideo = true;
             // open CamSendMeetActivity
             Intent camIntent = new Intent(this, CamSendMeetActivity.class);
             camIntent.putExtra("toUserID", toUserID);
             startActivity(camIntent);
+//
+//            simpleExoPlayerView.setVisibility(View.INVISIBLE);
+//            buttonOverlay.setVisibility(View.INVISIBLE);
         }
         else {
             String reason = "Self Meet";
