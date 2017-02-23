@@ -14,16 +14,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/info"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:textSize="18sp"
+        android:textSize="40sp"
+        android:text="Butterfly"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorPrimaryDark"
         />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:src="@drawable/butterfly_heart_android"
+        android:id="@+id/imageView"/>
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/login_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         />
 
 </RelativeLayout>

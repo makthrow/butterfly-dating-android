@@ -4,16 +4,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,9 +17,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
@@ -48,24 +41,12 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-
-import android.net.Uri;
-import android.widget.MediaController;
 import android.widget.RelativeLayout;
-import android.widget.VideoView;
 
 import airjaw.butterflyandroid.Camera.CamSendMeetActivity;
 
@@ -90,6 +71,8 @@ public class MeetActivity extends AppCompatActivity {
     private boolean shouldResumeVideo;
 
     int selectedUserAtIndexPath;
+
+    boolean currentlyPlayingVideo = false;// setting this bool avoids an exception with presenting video player modally over each other on multiple user taps.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,9 +101,8 @@ public class MeetActivity extends AppCompatActivity {
                 Log.i(TAG, "title: " + mediaSelected.getTitle());
                 Log.i(TAG, "mediaID: " + mediaSelected.getMediaID());
 
-                selectedUserAtIndexPath = position;
-
                 playVideoAtCell(position);
+                currentlyPlayingVideo = true;
             }
         });
 
@@ -139,21 +121,23 @@ public class MeetActivity extends AppCompatActivity {
 
         Log.i(TAG, "onStart");
 
-
         if (!shouldResumeVideo) {
 
             getUserLocation();
-
 //        getLocalIntroductions(); // TODO: change back for production
             getIntroductionsForAdmin(); // TODO: comment out for production
         }
-
         else {
             playVideoAtCell(lastVideoPlaying);
+            currentlyPlayingVideo = true;
         }
     }
 
     private void playVideoAtCell(final int cellNumber){
+
+        if (currentlyPlayingVideo) {return;}
+
+        selectedUserAtIndexPath = cellNumber;
 
         getDownloadURL(cellNumber, new MeetActivityInterface() {
             @Override
@@ -291,7 +275,7 @@ public class MeetActivity extends AppCompatActivity {
                 @Override
                 public void onKeyEntered(String key, GeoLocation location) {
                     System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
-                    Log.i("Query: Key added", key.toString());
+                    Log.i("Query: Key added: ", key);
 
                     mediaLocationKeysWithinRadius.add(key);
 
@@ -603,7 +587,7 @@ public class MeetActivity extends AppCompatActivity {
         simpleExoPlayer.release();
         simpleExoPlayerView.setVisibility(View.INVISIBLE);
         buttonOverlay.setVisibility(View.INVISIBLE);
-
+        currentlyPlayingVideo = false;
         shouldResumeVideo = false;
     }
 
@@ -614,7 +598,7 @@ public class MeetActivity extends AppCompatActivity {
 
 
         if (!toUserID.equals(Constants.userID)){
-            // currentlyPlayingVideo = false;
+            currentlyPlayingVideo = false;
 
             simpleExoPlayer.stop();
             simpleExoPlayer.release();

@@ -8,8 +8,10 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -22,11 +24,10 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <!-- android:theme="@style/AppTheme" -->
-
         <activity
             android:name=".HomeActivity"
             android:label=""
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".MeetActivity" />
         <activity android:name=".InboxActivity" />
@@ -43,9 +44,8 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
 
-        <activity android:name=".Camera.CamActivity"></activity>
-        <activity android:name=".Camera.CamSendMeetActivity"></activity>
-
+        <activity android:name=".Camera.CamActivity" />
+        <activity android:name=".Camera.CamSendMeetActivity" />
     </application>
 
 </manifest>

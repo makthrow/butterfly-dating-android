@@ -6,21 +6,8 @@
         <item name="colorPrimary">@color/colorActionBar</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>
+        <item name="android:windowBackground">@drawable/background_splash</item>
 
-    <!--<style name="MyCustomTabLayout" parent="Widget.Design.TabLayout">-->
-        <!--<item name="tabIndicatorColor">?attr/colorAccent</item>-->
-        <!--<item name="tabIndicatorHeight">2dp</item>-->
-        <!--<item name="tabPaddingStart">12dp</item>-->
-        <!--<item name="tabPaddingEnd">12dp</item>-->
-        <!--<item name="tabBackground">?attr/selectableItemBackground</item>-->
-        <!--<item name="tabTextAppearance">@style/MyCustomTabTextAppearance</item>-->
-        <!--<item name="tabSelectedTextColor">?android:textColorPrimary</item>-->
-    <!--</style>-->
-    <!--<style name="MyCustomTabTextAppearance" parent="TextAppearance.Design.Tab">-->
-        <!--<item name="android:textSize">14sp</item>-->
-        <!--<item name="android:textColor">?android:textColorSecondary</item>-->
-        <!--<item name="textAllCaps">true</item>-->
-    <!--</style>-->
+    </style>
 
 </resources>
