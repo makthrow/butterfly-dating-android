@@ -35,6 +35,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.LoopingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -82,6 +83,9 @@ public class MeetActivity extends AppCompatActivity {
     SimpleExoPlayerView simpleExoPlayerView;
     SimpleExoPlayer simpleExoPlayer;
 
+    private boolean shouldAutoPlay;
+    private boolean shouldShowPlaybackControls;
+
     int selectedUserAtIndexPath;
 
     @Override
@@ -119,6 +123,9 @@ public class MeetActivity extends AppCompatActivity {
 
         simpleExoPlayerView = (SimpleExoPlayerView) findViewById(R.id.exoPlayerVideoView);
         buttonOverlay = (RelativeLayout) findViewById(R.id.buttonOverlay);
+
+        shouldAutoPlay = true;
+        shouldShowPlaybackControls = false;
 
     }
 
@@ -177,9 +184,15 @@ public class MeetActivity extends AppCompatActivity {
                 // This is the MediaSource representing the media to be played.
                 MediaSource videoSource = new ExtractorMediaSource(uri,
                         dataSourceFactory, extractorsFactory, null, null);
+
+                // Loops the video indefinitely.
+                LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
+
                 // Prepare the player with the source.
-                simpleExoPlayer.prepare(videoSource);
-                simpleExoPlayer.setPlayWhenReady(true);
+//                simpleExoPlayer.prepare(videoSource); // this doesn't loop
+                simpleExoPlayer.prepare(loopingSource); // this loops
+                simpleExoPlayerView.setUseController(shouldShowPlaybackControls);
+                simpleExoPlayer.setPlayWhenReady(shouldAutoPlay);
 
             }
         });
