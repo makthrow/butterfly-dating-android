@@ -2,7 +2,6 @@ package airjaw.butterflyandroid;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
@@ -17,11 +16,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.VideoView;
-
-import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQuery;
-import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
@@ -47,9 +41,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,7 +59,7 @@ public class InboxActivity extends AppCompatActivity {
     SimpleExoPlayer simpleExoPlayer;
     private boolean shouldAutoPlay;
     private boolean shouldShowPlaybackControls;
-
+    boolean currentlyPlayingVideo = false;// setting this bool avoids an exception with presenting video player modally over each other on multiple user taps.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +91,8 @@ public class InboxActivity extends AppCompatActivity {
                 selectedUserAtIndexPath = position;
 
                 playVideoAtCell(position);
+                currentlyPlayingVideo = true;
+
             }
         });
 
@@ -253,6 +247,8 @@ public class InboxActivity extends AppCompatActivity {
 
     private void playVideoAtCell(int cellNumber){
 
+        if (currentlyPlayingVideo) {return;}
+
         getDownloadURL(cellNumber, new InboxActivityInterface() {
             @Override
             public void downloadURLCompleted(Uri uri) {
@@ -334,6 +330,7 @@ public class InboxActivity extends AppCompatActivity {
         simpleExoPlayer.release();
         simpleExoPlayerView.setVisibility(View.INVISIBLE);
         buttonOverlay.setVisibility(View.INVISIBLE);
+        currentlyPlayingVideo = false;
     }
 
     public void meetPerson(View view) {
