@@ -132,15 +132,14 @@ public class FacebookSDKMethods {
                                     editor.putInt("age", currentUserAge);
                                     Log.i(TAG, Integer.toString(currentUserAge));
                                 }
-                                editor.commit();
+                                if (email != null) {
+                                    editor.putString("email", email);
+                                }
+                                else {
+                                    email = "";
+                                }
 
-                                SharedPreferences prefs = context.getSharedPreferences(Constants.USER_FBINFO_PREFS, MODE_PRIVATE);
-                                String firstNamePrefs = prefs.getString("first_name", null);
-                                int agePrefs  = prefs.getInt("age", 30); // TODO: change this default age someday
-                                String genderPrefs = prefs.getString("gender", null);
-                                Log.i("PREFS", firstNamePrefs);
-                                Log.i("PREFS", Integer.toString(agePrefs));
-                                Log.i("PREFS", genderPrefs);
+                                editor.commit();
 
                                 Facebook_Info fbInfoDic = new Facebook_Info(name, gender, firstName, lastName, email, birthdayString, urlString);
                                 uploadFBUserInfo(fbInfoDic);

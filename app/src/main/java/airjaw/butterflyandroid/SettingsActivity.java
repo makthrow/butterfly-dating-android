@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
@@ -26,6 +27,8 @@ public class SettingsActivity extends AppCompatActivity {
     private CallbackManager callbackManager;
 
     private static final String TAG = "SettingsActivity";
+
+    WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         mensSwitch.setChecked(meetMenSwitchOn);
         womensSwitch.setChecked(meetWomenSwitchOn);
+
 
         if (mensSwitch != null) {
             mensSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -93,5 +97,33 @@ public class SettingsActivity extends AppCompatActivity {
     private void gotoLogin() {
         Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
         startActivity(intent);
+    }
+
+
+    public void eulaButtonClicked(View view) {
+
+        String eula = "file:///android_asset/EULA_11_28_2016.html";
+        Intent intent = new Intent(this, WebViewActivity.class);
+        intent.putExtra("urlofWebView", eula);
+        intent.putExtra("typeOfView", "EULA");
+        startActivity(intent);
+
+    }
+
+    public void privacyTOSButtonClicked(View view) {
+
+        String privacyTOS = "file:///android_asset/PrivacyPolicy_Oct242016_.html";
+        Intent intent = new Intent(this, WebViewActivity.class);
+        intent.putExtra("urlofWebView", privacyTOS);
+        intent.putExtra("typeOfView", "Privacy Policy");
+        startActivity(intent);
+
+    }
+
+    public void contactButtonClicked(View view) {
+
+        Intent intent = new Intent(this, SettingsContactUsActivity.class);
+        startActivity(intent);
+
     }
 }

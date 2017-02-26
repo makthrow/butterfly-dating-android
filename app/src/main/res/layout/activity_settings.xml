@@ -12,8 +12,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="airjaw.butterflyandroid.SettingsActivity">
 
-
-
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
@@ -47,20 +45,21 @@
         android:text="Contact Us"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/contactButton" />
+        android:id="@+id/contactButton"
+        android:onClick="contactButtonClicked"/>
 
     <Button
         android:text="Privacy and Terms of Service"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/privacyTOSButton" />
+        android:id="@+id/privacyTOSButton"
+        android:onClick="privacyTOSButtonClicked"/>
 
     <Button
         android:text="End User License Agreement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="eulaButtonClicked"
         android:id="@+id/eulaButton" />
-
-
 
 </LinearLayout>

@@ -252,19 +252,6 @@ public class FirebaseMethods {
 
                 Facebook_Info info = dataSnapshot.getValue(Facebook_Info.class);
                 callback.getUsersFBInfoCompleted(info);
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//
-//
-////                    String name = (String)snapshot.child("name").getValue();
-////                    String gender = (String)snapshot.child("gender").getValue();
-////                    String birthday = (String)snapshot.child("birthday").getValue();
-////                    String first_name = (String)snapshot.child("first_name").getValue();
-////                    String last_name = (String)snapshot.child("last_name").getValue();
-////                    String pictureURL = (String)snapshot.child("pictureURL").getValue();
-////                    String email = (String)snapshot.child("email").getValue();
-//
-////                    Facebook_Info FBUserInfoMap = new Facebook_Info(name, gender, first_name, last_name, email, birthday, pictureURL);
-//                }
             }
 
             @Override
