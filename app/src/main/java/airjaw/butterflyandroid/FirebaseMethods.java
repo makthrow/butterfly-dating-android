@@ -21,6 +21,7 @@ import com.google.firebase.storage.UploadTask;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -323,7 +324,45 @@ public class FirebaseMethods {
 
             }
         });
+    }
+    public static void createChatsMessagesFor(String chatID, String senderId, String withUserID, String text) {
+        DatabaseReference chatsMessagesRef = Constants.CHATS_MESSAGES_REF;
+        DatabaseReference newChatsMessagesRef = chatsMessagesRef.child(chatID).push();
 
+        ChatsMessage chatMessageDic = new ChatsMessage(text, senderId);
+        newChatsMessagesRef.setValue(chatMessageDic);
+        updateChatsMetaFor(chatID, text, senderId, withUserID);
+
+    }
+    private static void updateChatsMetaFor(String chatID, String text, String senderId, String withUserID) {
+        // NOTE: This method updates chats_meta for BOTH USERS in the chat
+        // currentUserId: update chats_meta with last message and last sender
+        DatabaseReference chatsMetaUserRef = Constants.CHATS_META_REF.child(senderId);
+        DatabaseReference newChatsMetaIDRef = chatsMetaUserRef.child(chatID);
+
+//        ChatsMeta chatsMetaDic = new ChatsMeta(chatID, text, withUserID, senderId, unread, withUserName, unsent_notification);
+        // don't need to create a new chatsMetaDic, just updating a few values  so use a hashmap
+
+        Map<String, Object> chatsMetaDic = new HashMap<String, Object>();
+        chatsMetaDic.put("lastMessage", text);
+        chatsMetaDic.put("lastSender", senderId);
+        chatsMetaDic.put("unread", false); // set to false because this is the currentUser own message
+        chatsMetaDic.put("unsent_notification", false); // set to false because this is the currentUser own message
+        chatsMetaDic.put("timestamp", Constants.firebaseServerValueTimestamp);
+
+        newChatsMetaIDRef.updateChildren(chatsMetaDic);
+
+        // withUserId: update chats_meta with last message and last sender
+        DatabaseReference withUserChatsMetaRef = Constants.CHATS_META_REF.child(withUserID);
+        DatabaseReference newWithUserChatsMetaIDRef = withUserChatsMetaRef.child(chatID);
+
+        Map<String, Object> withUserChatsMetaDic = new HashMap<String, Object>();
+        withUserChatsMetaDic.put("lastMessage", text);
+        withUserChatsMetaDic.put("lastSender", senderId);
+        withUserChatsMetaDic.put("unread", true);
+        withUserChatsMetaDic.put("unsent_notification", true);
+        withUserChatsMetaDic.put("timestamp", Constants.firebaseServerValueTimestamp);
+        newWithUserChatsMetaIDRef.updateChildren(withUserChatsMetaDic);
 
     }
 }
