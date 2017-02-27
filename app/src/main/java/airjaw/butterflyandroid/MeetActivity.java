@@ -50,6 +50,8 @@ import android.widget.RelativeLayout;
 
 import airjaw.butterflyandroid.Camera.CamSendMeetActivity;
 
+import static airjaw.butterflyandroid.R.styleable.SimpleExoPlayerView;
+
 public class MeetActivity extends AppCompatActivity {
 
     private static final String TAG = "MeetActivity";

@@ -345,6 +345,7 @@ public class InboxActivity extends AppCompatActivity {
             public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
 
             }
+
             @Override
             public void checkIfUsersAreMatched(boolean matched) {
                 if (matched) {
@@ -365,8 +366,12 @@ public class InboxActivity extends AppCompatActivity {
                     }
                 }
             }
-        });
 
+            @Override
+            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {
+
+            }
+        });
     }
 
     public String userIDFromMatch(int selectedUserAtIndexPath) {

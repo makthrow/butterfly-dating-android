@@ -28,7 +28,9 @@ public class ChatsMeta {
         this.withUserName = withUserName;
         this.unsent_notification = unsent_notification;
         timestamp = ServerValue.TIMESTAMP;
+    }
 
+    public ChatsMeta() {
     }
 
     public String getKey() {
