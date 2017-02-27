@@ -47,7 +47,7 @@
         <activity android:name=".Camera.CamActivity" />
         <activity android:name=".Camera.CamSendMeetActivity" />
         <activity android:name=".WebViewActivity" />
-        <activity android:name=".SettingsContactUsActivity"></activity>
+        <activity android:name=".ChatRoomActivity"></activity>
     </application>
 
 </manifest>

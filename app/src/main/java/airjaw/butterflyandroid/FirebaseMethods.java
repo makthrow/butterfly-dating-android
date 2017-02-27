@@ -12,11 +12,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -238,6 +241,11 @@ public class FirebaseMethods {
                 public void checkIfUsersAreMatched(boolean matched) {
 
                 }
+
+                @Override
+                public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {
+
+                }
             });
         }
     }
@@ -281,5 +289,41 @@ public class FirebaseMethods {
 
             }
         });
+    }
+    public static void fetchChatsMeta(final FirebaseMethodsInterface callback) {
+
+        DatabaseReference currentUserChatsMetaRef = Constants.CHATS_META_REF.child(Constants.userID);
+        Query latestChatsQuery = currentUserChatsMetaRef.orderByChild("timestamp");
+
+        final ArrayList<ChatsMeta> fetchedChatsMeta = new ArrayList<>();
+
+        latestChatsQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    ChatsMeta chatMetaDic = snapshot.getValue(ChatsMeta.class);
+                    // EXPLANATION: firebase has listeners, and these listeners fire in odd ways when you update data. sometimes it
+                    // will return duplicate entries. until we fix our firebase database calls, we have this error checking code here
+                    // that checks for duplicate chatID keys in our chatsMeta array.
+                    boolean duplicate = Arrays.asList(fetchedChatsMeta).contains(chatMetaDic);
+
+                    // we could do this in one "if" statement but I kept it if-else to match the iOS code
+                    if (duplicate) {
+
+                    }
+                    else {
+                        fetchedChatsMeta.add(chatMetaDic);
+                    }
+                }
+                callback.fetchChatsMetaCompleted(fetchedChatsMeta);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
     }
 }
