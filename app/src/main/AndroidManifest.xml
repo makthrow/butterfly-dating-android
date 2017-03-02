@@ -47,7 +47,8 @@
         <activity android:name=".Camera.CamActivity" />
         <activity android:name=".Camera.CamSendMeetActivity" />
         <activity android:name=".WebViewActivity" />
-        <activity android:name=".SettingsContactUsActivity" />
+        <activity android:name=".SettingsContactUsActivity"
+            android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".ChatRoomActivity"></activity>
     </application>
 
