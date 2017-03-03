@@ -31,7 +31,6 @@ public class SettingsContactUsActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("Contact Us");
         setSupportActionBar(myToolbar);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         editText = (EditText) findViewById(R.id.editText);

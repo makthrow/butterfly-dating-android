@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +41,11 @@ public class ChatRoomActivity extends AppCompatActivity {
         title = intent.getStringExtra("title");
         withUserName = title; // created new string with same value, not reference
 
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        myToolbar.setTitle(title);
+        setSupportActionBar(myToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         chatActive = true;
 
         Log.i(TAG, "chatID: " + chatID);
@@ -67,6 +73,12 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
         });
         displayChatMessages();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
     }
 
     private void displayChatMessages() {

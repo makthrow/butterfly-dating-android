@@ -36,11 +36,9 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        myToolbar.setTitle("");
-        setSupportActionBar(myToolbar);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         myToolbar.setTitle("Settings");
+        setSupportActionBar(myToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Context context = this;
         SharedPreferences settingsPrefs = context.getSharedPreferences(Constants.USER_SETTINGS_PREFS, MODE_PRIVATE);
