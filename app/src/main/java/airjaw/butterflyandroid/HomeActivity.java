@@ -51,9 +51,6 @@ public class HomeActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        AccessToken token = AccessToken.getCurrentAccessToken();
-        FacebookSDKMethods.getUserInfoFromFacebook(token, this);
-
         initLocation();
 
     }

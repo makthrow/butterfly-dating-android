@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void handleFacebookAccessToken(AccessToken token) {
+    private void handleFacebookAccessToken(final AccessToken token) {
         Log.d("Facebook Login", "handleFacebookAccessToken:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
@@ -167,13 +167,10 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
-
                         else {
-
+                            //SUCCESS LOGIN
+                            FacebookSDKMethods.getUserInfoFromFacebook(token, LoginActivity.this);
                         }
-
-
-                        // ...
                     }
                 });
     }
