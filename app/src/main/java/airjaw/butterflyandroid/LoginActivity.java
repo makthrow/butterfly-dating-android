@@ -139,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loggedInTransition() {
 
-        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        Intent intent = new Intent(LoginActivity.this, MeetActivity.class);
         startActivity(intent);
     }
 
