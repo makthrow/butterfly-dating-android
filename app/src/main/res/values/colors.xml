@@ -6,4 +6,5 @@
     <color name="colorActionBar">#FFFFFF</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorSettingsSwitch">#ff0000</color>
+    <color name="colorTaskbar">#cdd1e5</color>
 </resources>
