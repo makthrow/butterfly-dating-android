@@ -4,8 +4,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,6 +44,11 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,12 +56,14 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import airjaw.butterflyandroid.Camera.CamSendMeetActivity;
 
 import static airjaw.butterflyandroid.R.styleable.SimpleExoPlayerView;
 
-public class MeetActivity extends AppCompatActivity {
+public class MeetActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private static final String TAG = "MeetActivity";
 
@@ -61,10 +72,15 @@ public class MeetActivity extends AppCompatActivity {
     ArrayAdapter<String> stringAdapter;
     ListView mediaList;
 
-    GeoLocation lastLocation;
+    GeoLocation lastGeoLocation;
     RelativeLayout buttonOverlay;
     SimpleExoPlayerView simpleExoPlayerView;
     SimpleExoPlayer simpleExoPlayer;
+
+    private GoogleApiClient mGoogleApiClient;
+    private LocationServices locationClient;
+    private LocationRequest mLocationRequest;
+    Location lastLocation;
 
     private boolean shouldAutoPlay;
     private boolean shouldShowPlaybackControls;
@@ -115,11 +131,15 @@ public class MeetActivity extends AppCompatActivity {
         shouldShowPlaybackControls = false;
         shouldResumeVideo = false;
 
+        initLocation();
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+        mGoogleApiClient.connect();
 
         Log.i(TAG, "onStart");
 
@@ -132,6 +152,26 @@ public class MeetActivity extends AppCompatActivity {
         else {
             playVideoAtCell(lastVideoPlaying);
             currentlyPlayingVideo = true;
+        }
+    }
+
+    protected void onStop() {
+        super.onStop();
+        mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
         }
     }
 
@@ -268,10 +308,10 @@ public class MeetActivity extends AppCompatActivity {
 
         final ArrayList<String> mediaLocationKeysWithinRadius = new ArrayList<String>();
 
-        lastLocation = GeoFireGlobal.getInstance().getLastLocation();
+        lastGeoLocation = GeoFireGlobal.getInstance().getLastLocation();
 
-        if (lastLocation != null) {
-            GeoQuery circleQuery = Constants.geoFireMedia.queryAtLocation(lastLocation, 50);
+        if (lastGeoLocation != null) {
+            GeoQuery circleQuery = Constants.geoFireMedia.queryAtLocation(lastGeoLocation, 50);
 
             circleQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                 @Override
@@ -417,10 +457,10 @@ public class MeetActivity extends AppCompatActivity {
 
         final ArrayList<String> mediaLocationKeysWithinRadius = new ArrayList<String>();
 
-        lastLocation = GeoFireGlobal.getInstance().getLastLocation();
+        lastGeoLocation = GeoFireGlobal.getInstance().getLastLocation();
 
-        if (lastLocation != null) {
-            GeoQuery circleQuery = Constants.geoFireMedia.queryAtLocation(lastLocation, 50);
+        if (lastGeoLocation != null) {
+            GeoQuery circleQuery = Constants.geoFireMedia.queryAtLocation(lastGeoLocation, 50);
 
             circleQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                 @Override
@@ -567,7 +607,7 @@ public class MeetActivity extends AppCompatActivity {
             public void onLocationResult(String key, GeoLocation location) {
                 if (location != null) {
                     System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
-                    lastLocation = location;
+                    lastGeoLocation = location;
                 } else {
                     System.out.println(String.format("There is no location for key %s in GeoFire", key));
                     // TODO: request location permission
@@ -641,4 +681,95 @@ public class MeetActivity extends AppCompatActivity {
                 });
         alertDialog.show();
     }
+
+
+
+    // Location
+
+    private void initLocation() {
+
+        // Create the LocationRequest object
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setInterval(120 * 1000)        // 120 seconds, in milliseconds
+                .setFastestInterval(1 * 1000); // 1 seconds, in milliseconds
+
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
+    }
+
+    // ConnectionCallbacks
+    @Override
+    public void onConnected(Bundle connectionHint) {
+
+        // REQUEST PERMISSIONS
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    Constants.PERMISSION_ACCESS_COARSE_LOCATION);
+        }
+        // granted
+        else {
+            Log.i("PERMISSION", "onConnected: Granted");
+            lastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient);
+
+            if (lastLocation == null) {
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            }
+            else {
+                GeoLocation newLocation = new GeoLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
+                Constants.geoFireUsers.setLocation(Constants.userID, newLocation);
+                // set global var for GeoLocation
+                GeoFireGlobal.getInstance().setLastLocation(newLocation);
+            }
+        }
+    }
+
+    // PERMISSIONS
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case Constants.PERMISSION_ACCESS_COARSE_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "permission granted");
+                    // All good!
+                } else {
+                    Toast.makeText(this, "Need your location!", Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+        }    }
+
+    // OnConnectionFailedListener
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    // LocationListener
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.i(TAG, "onLocationChanged");
+        GeoLocation newLocation = new GeoLocation(location.getLatitude(), location.getLongitude());
+
+        Constants.geoFireUsers.setLocation(Constants.userID, newLocation);
+        // set global
+        GeoFireGlobal.getInstance().setLastLocation(newLocation);
+
+    }
+
 }
