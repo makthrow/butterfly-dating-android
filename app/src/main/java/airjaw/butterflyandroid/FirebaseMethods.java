@@ -105,7 +105,7 @@ public class FirebaseMethods {
                 Log.i(TAG, "upload FBStorage success: " + mediaID);
 
                 // create and upload video info data
-                uploadMeetMediaInfoToDatabase(mediaID, Constants.userID, toUserID, title, currentMediaTypeToUpload);
+                uploadMeetMediaInfoToDatabase(mediaID, Constants.userID, toUserID, title, currentMediaTypeToUpload, context);
 
             }
         });
@@ -120,10 +120,10 @@ public class FirebaseMethods {
         //upload video info to Firebase real-time database (separate from the video file itself which goes to Firebase storage, with the title we generate above)
 
         // create and upload video info data
-        SharedPreferences prefs = context.getSharedPreferences(Constants.USER_FBINFO_PREFS, MODE_PRIVATE);
-        String name = prefs.getString("first_name", null);
-        int age  = prefs.getInt("age", 30); // TODO: change this default age someday
-        String gender = prefs.getString("gender", null);
+        SharedPreferences userInfoPrefs = context.getSharedPreferences(Constants.USER_FBINFO_PREFS, MODE_PRIVATE);
+        String name = userInfoPrefs.getString("first_name", null);
+        int age  = userInfoPrefs.getInt("age", 30); // TODO: change this default age someday
+        String gender = userInfoPrefs.getString("gender", "none");
         Log.i("PREFS", name);
         Log.i("PREFS", Integer.toString(age));
         Log.i("PREFS", gender);
@@ -135,10 +135,14 @@ public class FirebaseMethods {
     }
 
     private static void uploadMeetMediaInfoToDatabase(String mediaID, String userID, String toUserID, String title,
-                                                      String mediaType) {
+                                                      String mediaType, Context context) {
         boolean unread = true;
         boolean unsent_notification = true;
-        Meet_Media newMeetMedia = new Meet_Media(mediaID, mediaType, title, toUserID, Constants.userID, unread, unsent_notification);
+
+        SharedPreferences userInfoPrefs = context.getSharedPreferences(Constants.USER_FBINFO_PREFS, MODE_PRIVATE);
+        final String userGender = userInfoPrefs.getString("gender", "none");
+
+        Meet_Media newMeetMedia = new Meet_Media(mediaID, mediaType, title, toUserID, Constants.userID, userGender, unread, unsent_notification);
 
         DatabaseReference meetMediaUserRef = Constants.MEET_MEDIA_REF.child(toUserID);
         DatabaseReference newMeetMediaChildRef = meetMediaUserRef.child(mediaID);

@@ -33,13 +33,15 @@
         android:text="Meet Women"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/meetWomenSwitch" />
+        android:id="@+id/meetWomenSwitch"
+        android:theme="@style/SettingsSwitchTheme" />
 
     <Switch
         android:text="Meet Men"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/meetMenSwitch" />
+        android:id="@+id/meetMenSwitch"
+        android:theme="@style/SettingsSwitchTheme" />
 
     <Button
         android:text="Contact Us"

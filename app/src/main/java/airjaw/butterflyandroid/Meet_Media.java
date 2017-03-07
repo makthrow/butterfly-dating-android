@@ -14,19 +14,22 @@ public class Meet_Media {
     private String title;
     private String toUserID;
     private String fromUserID;
+    private String gender;
+
     private boolean unread;
     private boolean unsent_notification;
 
     Object timestamp;
 
 
-    public Meet_Media(String mediaID, String mediaType, String title, String toUserID, String fromUserID, boolean unread, boolean unsent_notification) {
+    public Meet_Media(String mediaID, String mediaType, String title, String toUserID, String fromUserID, String gender, boolean unread, boolean unsent_notification) {
         this.mediaID = mediaID;
 
         this.mediaType = mediaType;
         this.title = title;
         this.toUserID = toUserID;
         this.fromUserID = fromUserID;
+        this.gender = gender;
         this.unread = unread;
         this.unsent_notification = unsent_notification;
 
@@ -73,6 +76,15 @@ public class Meet_Media {
 
     public void setFromUserID(String fromUserID) {
         fromUserID = fromUserID;
+    }
+
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     @Exclude

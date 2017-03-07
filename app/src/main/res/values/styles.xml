@@ -9,5 +9,8 @@
         <item name="android:windowBackground">@drawable/background_splash</item>
 
     </style>
+    <style name="SettingsSwitchTheme">
+        <item name="android:colorControlActivated">@color/colorSettingsSwitch</item> <!--Android API > 5.1-->
+    </style>
 
 </resources>

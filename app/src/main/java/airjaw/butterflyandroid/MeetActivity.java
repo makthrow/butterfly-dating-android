@@ -357,6 +357,8 @@ public class MeetActivity extends AppCompatActivity {
 
                     long age = (Long)snapshot.child("age").getValue();
 
+                    String nameAndTitle = name + ": " + title;
+
                     if (showMen && showWomen) {
                         // show all users
                     }
@@ -387,7 +389,7 @@ public class MeetActivity extends AppCompatActivity {
                         Log.i("media within radius: ", mediaID);
 
                         mediaIntroQueueList.add(mediaInfoDic);
-                        mediaIntroQueueListTitles.add(title);
+                        mediaIntroQueueListTitles.add(nameAndTitle);
 
                         }
                     else {
@@ -506,6 +508,8 @@ public class MeetActivity extends AppCompatActivity {
 
                     long age = (Long)snapshot.child("age").getValue();
 
+                    String nameAndTitle = name + ": " + title;
+
                     if (showMen && showWomen) {
                         // show all users
                     }
@@ -536,7 +540,7 @@ public class MeetActivity extends AppCompatActivity {
 //                        Log.i("media within radius: ", mediaID);
 
                         mediaIntroQueueList.add(mediaInfoDic);
-                        mediaIntroQueueListTitles.add(title);
+                        mediaIntroQueueListTitles.add(nameAndTitle);
 
                   //  }
 //                    else {

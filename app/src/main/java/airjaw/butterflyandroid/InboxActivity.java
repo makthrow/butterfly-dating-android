@@ -1,7 +1,9 @@
 package airjaw.butterflyandroid;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
@@ -174,19 +176,27 @@ public class InboxActivity extends AppCompatActivity {
 
         // TODO: FILTER: BLOCK LIST
 
+
+        // GENDER FILTER
+        Context context = this;
+        SharedPreferences settingsPrefs = context.getSharedPreferences(Constants.USER_SETTINGS_PREFS, MODE_PRIVATE);
+        final boolean showMen = settingsPrefs.getBoolean("meetMenSwitch", false);
+        final boolean showWomen = settingsPrefs.getBoolean("meetWomenSwitch", false);
+
         long currentTimeInMilliseconds = System.currentTimeMillis();
         System.out.println("currentTimeInMilliseconds:" + currentTimeInMilliseconds);
 
         long startTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 2); // 48 hours
         long endTime = currentTimeInMilliseconds;
 
-        // TODO: FILTER: GENDER
-
         DatabaseReference meetMediaUserRef = Constants.MEET_MEDIA_REF.child(Constants.userID);
         Query media48HourQuery = meetMediaUserRef.orderByChild("timestamp").startAt(startTime).endAt(endTime);
 
-        // Read from the database
-        media48HourQuery.addValueEventListener(new ValueEventListener() {
+        long startTimeOneMonth = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31); // 31 days
+        Query debuggingQueryOneMonth = meetMediaUserRef.orderByChild("timestamp").startAt(startTimeOneMonth).endAt(endTime);
+
+        // TODO: debugging Query set to one month. don't put in production
+        debuggingQueryOneMonth.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -214,6 +224,8 @@ public class InboxActivity extends AppCompatActivity {
                     String toUserID = (String)child.child("toUserID").getValue();
                     Log.i(TAG, "toUserID: " + toUserID);
 
+                    String gender = (String)child.child("gender").getValue();
+
                     boolean unread = (boolean)child.child("unread").getValue();
                     Log.i(TAG, "unread: " + unread);
 
@@ -223,8 +235,26 @@ public class InboxActivity extends AppCompatActivity {
                     long timestamp = (Long)child.child("timestamp").getValue();
                     Log.i(TAG, "timestamp: " + timestamp);
 
-                    Meet_Media newMeetMedia = new Meet_Media(mediaID, mediaType, title, toUserID, fromUserID, unread, unsent_notification);
+                    Meet_Media newMeetMedia = new Meet_Media(mediaID, mediaType, title, toUserID, fromUserID, gender, unread, unsent_notification);
                     newMeetMedia.setTimestamp(timestamp);
+
+                    // FILTER: GENDER
+                    if (showMen && showWomen) {
+                        // show all users
+                    }
+                    else if (!showMen && !showWomen) {
+                        // show all users
+                    }
+                    else if (!showMen) {
+                        if (gender.equals("male")) {
+                            continue; // exit loop for this child
+                        }
+                    }
+                    else if (!showWomen) {
+                        if (gender.equals("female")) {
+                            continue; // exit loop for this child
+                        }
+                    }
 
                     meetMedia.add(newMeetMedia);
                     meetMediaListTitles.add(title);
