@@ -272,8 +272,6 @@ public class FirebaseMethods {
 
             }
         });
-
-
     }
 
     public static void checkIfMatched(String currentUserID, String withUserID, final FirebaseMethodsInterface callback) {
@@ -300,20 +298,36 @@ public class FirebaseMethods {
         DatabaseReference currentUserChatsMetaRef = Constants.CHATS_META_REF.child(Constants.userID);
         Query latestChatsQuery = currentUserChatsMetaRef.orderByChild("timestamp");
 
-        final ArrayList<ChatsMeta> fetchedChatsMeta = new ArrayList<>();
-
         latestChatsQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
+                final ArrayList<ChatsMeta> fetchedChatsMeta = new ArrayList<>();
+
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     ChatsMeta chatMetaDic = snapshot.getValue(ChatsMeta.class);
                     // EXPLANATION: firebase has listeners, and these listeners fire in odd ways when you update data. sometimes it
                     // will return duplicate entries. until we fix our firebase database calls, we have this error checking code here
                     // that checks for duplicate chatID keys in our chatsMeta array.
-                    boolean duplicate = Arrays.asList(fetchedChatsMeta).contains(chatMetaDic);
+
+                    // TODO: fix this duplicate shit. see if it's even necessary.
+                    boolean skipOldDuplicate = false;
+
+                    Log.i("FetchChatsMeta" , chatMetaDic.getKey());
+
+                    for (int i = 0; i < fetchedChatsMeta.size(); i++) {
+                        if (fetchedChatsMeta.get(i).getKey().equals(chatMetaDic.getKey())) {
+                            Log.i("duplicate key: ", chatMetaDic.getKey());
+                            skipOldDuplicate = true;
+//                            if (fetchedChatsMeta.get(i).getTimestampLong() > chatMetaDic.getTimestampLong()) {
+//                                Log.i("Firebase Methods", "older key is newer, skipping this key");
+//                                skipOldDuplicate = true;
+//                            }
+                        }
+                    }
 
                     // we could do this in one "if" statement but I kept it if-else to match the iOS code
-                    if (duplicate) {
+                    if (skipOldDuplicate) {
 
                     }
                     else {
@@ -369,4 +383,5 @@ public class FirebaseMethods {
         newWithUserChatsMetaIDRef.updateChildren(withUserChatsMetaDic);
 
     }
+
 }

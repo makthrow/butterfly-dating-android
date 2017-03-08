@@ -4,4 +4,8 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="webview_horizontal_margin">1dp</dimen>
     <dimen name="webview_vertical_margin">1dp</dimen>
+
+    <!--chat row stuff-->
+    <dimen name="chat_row_name">20dp</dimen>
+    <dimen name="last_message">15dip</dimen>
 </resources>

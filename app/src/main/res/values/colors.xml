@@ -7,4 +7,13 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorSettingsSwitch">#ff0000</color>
     <color name="colorTaskbar">#cdd1e5</color>
+
+
+    <!--chat row stuff-->
+    <color name="colorLastMessage">#000000</color>
+    <color name="list_divider">#d9d9d9</color>
+    <color name="list_row_start_color">#ffffff</color>
+    <color name="list_row_end_color">#ffffff</color>
+    <color name="list_row_hover_start_color">#ebeef0</color>
+    <color name="list_row_hover_end_color">#ebeef0</color>
 </resources>

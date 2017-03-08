@@ -1,7 +1,9 @@
 package airjaw.butterflyandroid;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.media.Image;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -11,9 +13,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.StorageReference;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
     /*
@@ -30,11 +40,9 @@ public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "ChatActivity";
 
     private static ArrayList<ChatsMeta> chatsMeta = new ArrayList<ChatsMeta>();
-    private static ArrayList<String> chatMetaCellTitles = new ArrayList<>();
-    private static ArrayList<Image> chatImages = new ArrayList<Image>();
-
-    ArrayAdapter<String> stringAdapter;
     ListView chatList;
+    private List<ChatRow> chatRowList = new ArrayList<>();
+    private ChatRowCustomListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,25 +52,18 @@ public class ChatActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
-        chatList = (ListView) findViewById(R.id.chatListView);
+        initChatRows();
+    }
 
-        stringAdapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_list_item_1,
-                chatMetaCellTitles);
-        chatList.setAdapter(stringAdapter);
+    private void initChatRows() {
+        chatList = (ListView) findViewById(R.id.activity_chat_listview);
+        adapter = new ChatRowCustomListAdapter(this, chatRowList);
+        chatList.setAdapter(adapter);
 
         chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String title =  (String) parent.getItemAtPosition(position);
-                ChatsMeta chatMetaSelected = chatsMeta.get(position);
-
-                Log.i(TAG, "onitemclickListener: " + title);
-                Log.i(TAG, "onitemclickListener key: " + chatMetaSelected.getKey());
-
-                // get media
-                ChatsMeta chatSelected = chatsMeta.get(position);
+                ChatsMeta chatMetaSelected = chatRowList.get(position).getChatMetaObj();
 
                 Intent intent = new Intent(ChatActivity.this, ChatRoomActivity.class);
                 intent.putExtra("chatID", chatMetaSelected.getKey());
@@ -71,11 +72,22 @@ public class ChatActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        fetchChatsMeta();
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    private void fetchChatsMeta() {
 
         FirebaseMethods.fetchChatsMeta(new FirebaseMethodsInterface() {
             @Override
@@ -91,54 +103,35 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {
                 chatsMeta = chatsMetaList;
-                populateChatsMetaCellTitles(chatsMetaList);
+                populateChatRows(chatsMetaList);
             }
         });
     }
 
-    private void populateChatsMetaCellTitles(ArrayList<ChatsMeta> chatsMetaList) {
-        // helper function that iterates through our chatsMeta array and creates cell titles to display,
-        // and adds them to our chatMetaCellTitles array.
+    private void populateChatRows(ArrayList<ChatsMeta> chatsMetaList) {
 
-        Log.i(TAG, "calling populateChatsMetaCellTitles");
-
-        chatMetaCellTitles.clear();
+        chatRowList.clear();
 
         for (int i = 0; i < chatsMetaList.size(); i++) {
-
             Log.i(TAG, "KEY: " + chatsMetaList.get(i).getKey());
 
-            ChatsMeta chatMetaObj = chatsMetaList.get(i);
+            final ChatsMeta chatMetaObj = chatsMetaList.get(i);
 
-            String lastMessage = chatMetaObj.getLastMessage();
-            String lastSenderID = chatMetaObj.getLastSender();
-            String withUserName = chatMetaObj.getWithUserName();
+            StorageReference fbPhotoRef = Constants.storageFBProfilePicRef.child(chatMetaObj.getWithUserID());
+            fbPhotoRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    String profilePicURL = uri.toString();
+                    Log.i(TAG, "retrieved profilePicURL: " + profilePicURL);
 
-            // create the message to display here
-            if (lastSenderID.equals("none")) {
-                chatMetaCellTitles.add(lastMessage);
-                Log.i(TAG, "adding key: " + chatMetaObj.getKey());
-            }
-            else { // already matched
-                if (chatMetaObj.isUnread()) {
-                    if (!lastSenderID.equals(Constants.userID)){
-                        String cellText = withUserName + ": " + lastMessage;
-                        chatMetaCellTitles.add(cellText);
-                    }
+                    ChatRow newChatRowObj = new ChatRow(chatMetaObj, profilePicURL);
+                    chatRowList.add(newChatRowObj);
+                    adapter.notifyDataSetChanged();
+
                 }
-                else {
-                    if (lastSenderID.equals(Constants.userID)) {
-                        String cellText = "You: " + lastMessage;
-                        chatMetaCellTitles.add(cellText);
-                    }
-                    else {
-                        String cellText = withUserName + ": " + lastMessage;
-                        chatMetaCellTitles.add(cellText);
-                    }
-                }
-            }
+            });
         }
-        stringAdapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
     }
 
         @Override
@@ -190,9 +183,5 @@ public class ChatActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
-    }
-
-    private static void showConfirmDeleteNotificationFor() {
-
     }
 }

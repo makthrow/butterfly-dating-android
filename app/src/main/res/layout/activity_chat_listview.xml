@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp" >
+
+    <!-- Thumbnail Image -->
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/chat_fb_pic_thumbnail"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="8dp" />
+
+    <!-- Chat Title (name of person) -->
+    <TextView
+        android:id="@+id/chat_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/chat_fb_pic_thumbnail"
+        android:layout_toRightOf="@+id/chat_fb_pic_thumbnail"
+        android:textSize="@dimen/chat_row_name"
+        android:textStyle="bold" />
+
+    <!-- Last Message -->
+    <TextView
+        android:id="@+id/chat_last_message"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/chat_fb_pic_thumbnail"
+        android:layout_below="@id/chat_title"
+        android:textColor="@color/colorLastMessage"
+        android:textSize="@dimen/last_message" />
+
+</RelativeLayout>

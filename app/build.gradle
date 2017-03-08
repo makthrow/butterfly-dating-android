@@ -42,6 +42,7 @@ dependencies {
     compile 'com.firebase:geofire-android:2.1.1'
     // Firebase UI
     compile 'com.firebaseui:firebase-ui-database:0.4.0'
+    compile 'com.firebaseui:firebase-ui-storage:0.6.0'
     testCompile 'junit:junit:4.12'
     compile 'com.squareup.picasso:picasso:2.5.2'
     // Butterknife
@@ -50,6 +51,9 @@ dependencies {
     // for dates and times
     compile 'net.danlew:android.joda:2.9.5.1'
     compile 'com.google.android.exoplayer:exoplayer:r2.2.0'
+
+    compile 'com.android.volley:volley:1.0.0'
+
 }
 
 
