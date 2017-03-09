@@ -70,6 +70,9 @@ public class InboxActivity extends AppCompatActivity {
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        myToolbar.setTitle("");
+        myToolbar.setSubtitle("");
 
         mediaList = (ListView) findViewById(R.id.mediaListView);
 

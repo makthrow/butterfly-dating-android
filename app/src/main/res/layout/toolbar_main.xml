@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorTaskbar"
-        android:theme="@style/AppTheme"/>
+        android:theme="@style/ToolbarTheme"
+        android:titleTextAppearance="@style/Toolbar.TitleText"/>
 
 </android.support.design.widget.AppBarLayout>
