@@ -1,8 +1,10 @@
 package airjaw.butterflyandroid;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.nfc.Tag;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +19,7 @@ import com.facebook.FacebookRequestError;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -71,11 +74,21 @@ public class LoginActivity extends AppCompatActivity {
                 );
                 */
 
-                // get an access token for the signed-in user, exchange it for a Firebase credential,
-                // and authenticate with Firebase using the Firebase credential:
-                token = loginResult.getAccessToken();
-                handleFacebookAccessToken(token);
+                // check key permissions from facebook granted.
+                // if user goes into facebook settings and revokes permissions later, need to handle that somehow
+                // but we will have all of the data we need saved upon login
 
+                if (verifyFacebookPermissionsGranted(loginResult)) {
+                    // get an access token for the signed-in user, exchange it for a Firebase credential,
+                    // and authenticate with Firebase using the Firebase credential:
+                    token = loginResult.getAccessToken();
+                    handleFacebookAccessToken(token);
+                }
+                else {
+                    facebookPermissionsRequiredAlert();
+                    mFirebaseAuth.signOut();
+                    LoginManager.getInstance().logOut();
+                }
             }
 
             @Override
@@ -175,5 +188,31 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    private boolean verifyFacebookPermissionsGranted(LoginResult result) {
+        if (result.getRecentlyDeniedPermissions().contains("user_birthday") ||
+                result.getRecentlyDeniedPermissions().contains("user_friends") ||
+                result.getRecentlyDeniedPermissions().contains("user_education_history")) {
+            return false;
+        }
+        return true;
+    }
+
+    private void facebookPermissionsRequiredAlert() {
+        String title = "Facebook Permissions";
+        String message = "Butterfly requires you to provide additional Facebook permissions in order to create or use this service. This information is for your and other users' safety, provides more authenticity to profiles, and allows us to better provide support.";
+
+        // Called upon login if user refuses to provide facebook permissions
+
+        AlertDialog alertDialog = new AlertDialog.Builder(LoginActivity.this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Ask Me",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
 
 }
