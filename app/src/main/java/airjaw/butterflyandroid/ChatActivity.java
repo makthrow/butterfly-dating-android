@@ -1,8 +1,6 @@
 package airjaw.butterflyandroid;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.media.Image;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,14 +10,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.bumptech.glide.Glide;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
@@ -73,13 +66,12 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        fetchChatsMeta();
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        fetchChatsMeta();
 
     }
     @Override
@@ -117,22 +109,42 @@ public class ChatActivity extends AppCompatActivity {
 
             final ChatsMeta chatMetaObj = chatsMetaList.get(i);
 
+            final int j = i; // to keep track of which profile pic goes with which index in chatRowList
+            Log.i(TAG, "j: " + Integer.toString(j));
+
+            ChatRow newChatRowObj = new ChatRow(chatMetaObj, "");
+            chatRowList.add(newChatRowObj);
+
             StorageReference fbPhotoRef = Constants.storageFBProfilePicRef.child(chatMetaObj.getWithUserID());
             fbPhotoRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                 @Override
                 public void onSuccess(Uri uri) {
+
                     String profilePicURL = uri.toString();
                     Log.i(TAG, "retrieved profilePicURL: " + profilePicURL);
 
-                    ChatRow newChatRowObj = new ChatRow(chatMetaObj, profilePicURL);
-                    chatRowList.add(newChatRowObj);
-                    adapter.notifyDataSetChanged();
+                    // This is skewing the chronological order of the rows.
+                    // whichever chatrow has its download finish first is being added first, even if
+                    // the timestamp is older.
 
+                    // one way to fix this is to take out the profile pic from the ChatRow and give it its own adapter.
+                    // I decided this was too convoluted.
+
+                    // THE SOLUTION I USED: add the ChatRow objects in the proper order they're fetched from the Firebase method call,
+                    // then as the profile pics are downloaded, set the profile pics manually in our chatRowList
+
+                    // this is separate from the issue of Firebase returning timestamps ordered in ascending.
+                    // to fix that:
+                    // 1) (SOLUTION I USED: )client side: clone the array in reverse. or 1a) use prepend instead of append. or a linked list, for example.
+                    // 2) in the firebase method call, add a timestamp attribute that is (* -1 ) and then sort by that.
+
+                    chatRowList.get(j).setProfilePicURL(profilePicURL);
+                    adapter.notifyDataSetChanged();
                 }
             });
         }
-        adapter.notifyDataSetChanged();
     }
+
 
         @Override
     public boolean onCreateOptionsMenu(Menu menu) {

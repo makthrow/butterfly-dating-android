@@ -17,9 +17,8 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -302,7 +301,7 @@ public class FirebaseMethods {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                final ArrayList<ChatsMeta> fetchedChatsMeta = new ArrayList<>();
+                ArrayList<ChatsMeta> fetchedChatsMeta = new ArrayList<>();
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     ChatsMeta chatMetaDic = snapshot.getValue(ChatsMeta.class);
@@ -310,19 +309,14 @@ public class FirebaseMethods {
                     // will return duplicate entries. until we fix our firebase database calls, we have this error checking code here
                     // that checks for duplicate chatID keys in our chatsMeta array.
 
-                    // TODO: fix this duplicate shit. see if it's even necessary.
                     boolean skipOldDuplicate = false;
 
-                    Log.i("FetchChatsMeta" , chatMetaDic.getKey());
+                    Log.i("FetchChatsMeta" , chatMetaDic.getKey() + ": " + chatMetaDic.getTimestampLong());
 
                     for (int i = 0; i < fetchedChatsMeta.size(); i++) {
                         if (fetchedChatsMeta.get(i).getKey().equals(chatMetaDic.getKey())) {
                             Log.i("duplicate key: ", chatMetaDic.getKey());
                             skipOldDuplicate = true;
-//                            if (fetchedChatsMeta.get(i).getTimestampLong() > chatMetaDic.getTimestampLong()) {
-//                                Log.i("Firebase Methods", "older key is newer, skipping this key");
-//                                skipOldDuplicate = true;
-//                            }
                         }
                     }
 
@@ -334,6 +328,10 @@ public class FirebaseMethods {
                         fetchedChatsMeta.add(chatMetaDic);
                     }
                 }
+
+                // reverse array so that timestamps are now descending
+                // TODO: one mystery is why this works fine on iOS, without reversing?
+                Collections.reverse(fetchedChatsMeta);
                 callback.fetchChatsMetaCompleted(fetchedChatsMeta);
             }
 

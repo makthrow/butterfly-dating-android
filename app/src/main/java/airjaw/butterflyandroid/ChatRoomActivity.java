@@ -13,8 +13,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseListAdapter;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 public class ChatRoomActivity extends AppCompatActivity {
@@ -115,9 +113,15 @@ public class ChatRoomActivity extends AppCompatActivity {
         };
 
         listOfMessages.setAdapter(adapter);
+
+        setupDataObserverForScroll();
     }
 
     private void showChatClosedNotification(){
 
     }
+    private void setupDataObserverForScroll() {
+        // TODO:
+    }
+
 }
