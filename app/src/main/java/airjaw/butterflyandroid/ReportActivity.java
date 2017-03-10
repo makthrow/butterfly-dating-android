@@ -83,8 +83,8 @@ public class ReportActivity extends AppCompatActivity {
         alertDialog.show();
     }
     private void showBlockedAlert(){
-        String title = "Success";
-        String message = "User Blocked";
+        String title = "User Blocked Successfully";
+        String message = "To Delete any Chats with this User, Click the Delete Button At the Top of The Chat";
 
         AlertDialog alertDialog = new AlertDialog.Builder(ReportActivity.this).create();
         alertDialog.setTitle(title);

@@ -100,6 +100,11 @@ public class ChatActivity extends AppCompatActivity {
                 chatsMeta = chatsMetaList;
                 populateChatRows(chatsMetaList);
             }
+
+            @Override
+            public void getBlockListCompleted(ArrayList<String> blockedUsers) {
+
+            }
         });
     }
 

@@ -252,6 +252,12 @@ public class FirebaseMethods {
                 public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {
 
                 }
+
+                @Override
+                public void getBlockListCompleted(ArrayList<String> blockedUsers) {
+
+                }
+
             });
         }
     }
@@ -408,16 +414,10 @@ public class FirebaseMethods {
 
         DatabaseReference blockedUserIDsRef = Constants.USERS_REF.child(Constants.userID).child("/blockedUserIDs");
 
-//        Map<String, Boolean> dic = new HashMap<String, Boolean>();
-//        dic.put(userIDToBlock, true);
-
         blockedUserIDsRef.child(userIDToBlock).setValue(true);
 
         // add block for the reporting user too
         DatabaseReference reportingUserIDRef = Constants.USERS_REF.child(userIDToBlock).child("/blockedUserIDs");
-
-//        HashMap<String, Boolean> dic2 = new HashMap<String, Boolean>();
-//        dic2.put(Constants.userID, true);
 
         reportingUserIDRef.child(Constants.userID).setValue(true);
 
@@ -472,6 +472,37 @@ public class FirebaseMethods {
         DatabaseReference chatsMetaMatchedUserRef = Constants.CHATS_META_REF.child(matchedUserID);
         DatabaseReference newChatMetaRefForMatchedUser = chatsMetaMatchedUserRef.child(chatID);
         newChatMetaRefForMatchedUser.removeValue();
+    }
+    public static void getBlockList(final FirebaseMethodsInterface callback) {
+        DatabaseReference blockedUsersRef = Constants.USERS_REF.child(Constants.userID).child("blockedUserIDs");
+
+        blockedUsersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<String> blockedUsers = new ArrayList<>();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                    Log.i(TAG, snapshot.getKey());
+                    Log.i(TAG, (String) snapshot.getValue().toString());
+
+                    String userID = snapshot.getKey();
+                    if (snapshot.getValue().equals(true)) {
+                        blockedUsers.add(userID);
+                    }
+                }
+                callback.getBlockListCompleted(blockedUsers);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
     }
 
 }

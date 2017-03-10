@@ -53,6 +53,8 @@ public class InboxActivity extends AppCompatActivity {
 
     private static ArrayList<Meet_Media> meetMedia = new ArrayList<Meet_Media>();
     private static ArrayList<String> meetMediaListTitles = new ArrayList<>();
+    private static ArrayList<String> blockList = new ArrayList<>();
+
     ArrayAdapter<String> stringAdapter;
     ListView mediaList;
     RelativeLayout buttonOverlay;
@@ -177,8 +179,9 @@ public class InboxActivity extends AppCompatActivity {
 
         final ArrayList<String> mediaLocationKeysWithinRadius = new ArrayList<String>();
 
-        // TODO: FILTER: BLOCK LIST
+        // FILTER: BLOCK LIST
 
+        getBlockList();
 
         // GENDER FILTER
         Context context = this;
@@ -259,8 +262,13 @@ public class InboxActivity extends AppCompatActivity {
                         }
                     }
 
-                    meetMedia.add(newMeetMedia);
-                    meetMediaListTitles.add(title);
+                    if (!blockList.contains(fromUserID)) {
+                        meetMedia.add(newMeetMedia);
+                        meetMediaListTitles.add(title);
+                    }
+                    else {
+                        Log.i(TAG, "blockList contains userID: " + fromUserID);
+                    }
 
                 }
 
@@ -404,6 +412,12 @@ public class InboxActivity extends AppCompatActivity {
             public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {
 
             }
+
+            @Override
+            public void getBlockListCompleted(ArrayList<String> blockedUsers) {
+
+            }
+
         });
     }
 
@@ -473,5 +487,32 @@ public class InboxActivity extends AppCompatActivity {
                     }
                 });
         alertDialog.show();
+    }
+
+    private void getBlockList() {
+        // FILTER: BLOCK LIST
+        FirebaseMethods.getBlockList(new FirebaseMethodsInterface() {
+            @Override
+            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
+
+            }
+
+            @Override
+            public void checkIfUsersAreMatched(boolean alreadyMatched) {
+
+            }
+
+            @Override
+            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {
+            }
+            @Override
+            public void getBlockListCompleted(ArrayList<String> fetchedBlockList) {
+                blockList = fetchedBlockList;
+                for (int i = 0; i < blockList.size(); i++) {
+                    Log.i(TAG, "blocked user: " + blockList.get(i));
+                }
+            }
+        });
+
     }
 }

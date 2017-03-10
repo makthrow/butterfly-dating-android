@@ -72,6 +72,8 @@ public class MeetActivity extends AppCompatActivity implements
     ArrayAdapter<String> stringAdapter;
     ListView mediaList;
 
+    private static ArrayList<String> blockList = new ArrayList<>();
+
     GeoLocation lastGeoLocation;
     RelativeLayout buttonOverlay;
     SimpleExoPlayerView simpleExoPlayerView;
@@ -349,7 +351,8 @@ public class MeetActivity extends AppCompatActivity implements
             Log.i("LOCATION", "last location null)");
         }
 
-        // TODO: FILTER: BLOCK LIST
+        // FILTER: BLOCK LIST
+        getBlockList();
 
         long currentTimeInMilliseconds = System.currentTimeMillis();
         System.out.println("currentTimeInMilliseconds:" + currentTimeInMilliseconds);
@@ -429,10 +432,15 @@ public class MeetActivity extends AppCompatActivity implements
 
                         Log.i("media within radius: ", mediaID);
 
-                        mediaIntroQueueList.add(mediaInfoDic);
-                        mediaIntroQueueListTitles.add(nameAndTitle);
-
+                        if (!blockList.contains(userID)) {
+                            mediaIntroQueueList.add(mediaInfoDic);
+                            mediaIntroQueueListTitles.add(nameAndTitle);
                         }
+                        else {
+                            Log.i(TAG, "blockList contains userID: " + userID);
+                        }
+
+                    }
                     else {
                         Log.i("media not in radius: ", mediaID);
                     }
@@ -498,7 +506,8 @@ public class MeetActivity extends AppCompatActivity implements
             Log.i("LOCATION", "last location null)");
         }
 
-        // TODO: FILTER: BLOCK LIST
+        // FILTER: BLOCK LIST
+        getBlockList();
 
         long currentTimeInMilliseconds = System.currentTimeMillis();
         System.out.println("currentTimeInMilliseconds:" + currentTimeInMilliseconds);
@@ -573,20 +582,14 @@ public class MeetActivity extends AppCompatActivity implements
 
                     Media_Info mediaInfoDic = new Media_Info(age, gender, mediaID, name, title, userID);
                     mediaInfoDic.setTimestamp(timestamp);
-                    // continue filter list by geographical radius:
-                    //  key is found in the array of local mediaID from circleQuery
 
-//                    if (mediaLocationKeysWithinRadius.contains(mediaID)) {
-//
-//                        Log.i("media within radius: ", mediaID);
-
+                    if (!blockList.contains(userID)) {
                         mediaIntroQueueList.add(mediaInfoDic);
                         mediaIntroQueueListTitles.add(nameAndTitle);
-
-                  //  }
-//                    else {
-//                        Log.i("media not in radius: ", mediaID);
-//                    }
+                    }
+                    else {
+                        Log.i(TAG, "blockList contains userID: " + userID);
+                    }
                 }
 
                 stringAdapter.notifyDataSetChanged();
@@ -770,6 +773,33 @@ public class MeetActivity extends AppCompatActivity implements
         Constants.geoFireUsers.setLocation(Constants.userID, newLocation);
         // set global
         GeoFireGlobal.getInstance().setLastLocation(newLocation);
+
+    }
+
+    private void getBlockList() {
+        // FILTER: BLOCK LIST
+        FirebaseMethods.getBlockList(new FirebaseMethodsInterface() {
+            @Override
+            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
+
+            }
+
+            @Override
+            public void checkIfUsersAreMatched(boolean alreadyMatched) {
+
+            }
+
+            @Override
+            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {
+            }
+            @Override
+            public void getBlockListCompleted(ArrayList<String> fetchedBlockList) {
+                blockList = fetchedBlockList;
+                for (int i = 0; i < blockList.size(); i++) {
+                    Log.i(TAG, "blocked user: " + blockList.get(i));
+                }
+            }
+        });
 
     }
 

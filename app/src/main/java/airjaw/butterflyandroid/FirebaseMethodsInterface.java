@@ -15,4 +15,6 @@ public interface FirebaseMethodsInterface {
 
     public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta);
 
+    public void getBlockListCompleted(ArrayList<String> blockedUsers);
+
 }
