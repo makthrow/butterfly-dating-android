@@ -19,7 +19,16 @@ tools:context="airjaw.butterflyandroid.ChatRoomActivity">
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <!--<ImageButton-->
+            <!--android:id="@+id/tab_settings"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="right"-->
+            <!--android:onClick="openReportActivity"-->
+            <!--android:src="@drawable/ic_report_problem_white_24dp" />-->
+    </android.support.v7.widget.Toolbar>
 
 
     <android.support.design.widget.FloatingActionButton

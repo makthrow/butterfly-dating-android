@@ -1,12 +1,16 @@
 package airjaw.butterflyandroid;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -122,6 +126,72 @@ public class ChatRoomActivity extends AppCompatActivity {
     }
     private void setupDataObserverForScroll() {
         // TODO:
+    }
+
+    public void openReportActivity(View view) {
+        Intent reportIntent = new Intent(this, ReportActivity.class);
+        reportIntent.putExtra("withUserName", withUserName);
+        reportIntent.putExtra("userIDToReport", withUserID);
+        startActivity(reportIntent);
+
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_chatroom, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.report:
+                Log.i("ChatRoomActivityMenu", "report");
+
+                Intent reportIntent = new Intent(this, ReportActivity.class);
+                reportIntent.putExtra("withUserName", withUserName);
+                reportIntent.putExtra("userIDToReport", withUserID);
+                startActivity(reportIntent);
+
+                return true;
+            case R.id.delete:
+                Log.i("ChatRoomActivityMenu", "delete");
+                showConfirmDeleteNotification();
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    private void showConfirmDeleteNotification() {
+        String title = "Delete Chat";
+        String message = "Are you sure you want to close this chat? You can still match with this user later";
+
+        AlertDialog alertDialog = new AlertDialog.Builder(ChatRoomActivity.this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Close this Chat",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        deleteCurrentChat();
+                        onSupportNavigateUp();
+                    }
+                });
+        alertDialog.show();
+    }
+    private void deleteCurrentChat() {
+        FirebaseMethods.deleteChatFor(chatID, withUserID);
     }
 
 }

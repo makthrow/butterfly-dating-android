@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import airjaw.butterflyandroid.model.ReportedUser;
+
 import static android.content.Context.MODE_PRIVATE;
 
 /**
@@ -380,6 +382,96 @@ public class FirebaseMethods {
         withUserChatsMetaDic.put("timestamp", Constants.firebaseServerValueTimestamp);
         newWithUserChatsMetaIDRef.updateChildren(withUserChatsMetaDic);
 
+    }
+
+    public static void reportUserInDatabase(int type, String userIDToReport, String text) {
+        // types: "inappropriateContent" (1), "spamOrFakeUser" (2), "harassment" (3), "other" (4)
+
+        // reportedUsers
+        //   userID:
+        //      types: 1
+        //      fromUser:
+        //      toUser (not necessary? it's the key)
+        //      text: ""
+
+        DatabaseReference reportRef = Constants.REPORTED_USERS_REF.child(userIDToReport).push();
+
+        ReportedUser newReport = new ReportedUser(type, Constants.userID, text);
+
+        reportRef.setValue(newReport);
+
+    }
+
+    public static void blockUser(String userIDToBlock) {
+        //   users/userID/blockedUserIDs:
+        //          userID1: true, userID2:true
+
+        DatabaseReference blockedUserIDsRef = Constants.USERS_REF.child(Constants.userID).child("/blockedUserIDs");
+
+//        Map<String, Boolean> dic = new HashMap<String, Boolean>();
+//        dic.put(userIDToBlock, true);
+
+        blockedUserIDsRef.child(userIDToBlock).setValue(true);
+
+        // add block for the reporting user too
+        DatabaseReference reportingUserIDRef = Constants.USERS_REF.child(userIDToBlock).child("/blockedUserIDs");
+
+//        HashMap<String, Boolean> dic2 = new HashMap<String, Boolean>();
+//        dic2.put(Constants.userID, true);
+
+        reportingUserIDRef.child(Constants.userID).setValue(true);
+
+    }
+
+    public static void deleteChatFor(String chatID, String matchedUserID) {
+        /* this will remove all traces of a match/chat between 2 users
+     * if one user calls this method, the chats are removed for both users.
+     * the current user of the app is not passed in as a parameter because we Constants.userID for himself
+     * REMOVE new entries under /users/userID/chats    and   /users/userID/chats_with_users
+     * REMOVE new entries in chats_members, and chats_messages
+     * REMOVE new entries in chats_meta under "users/userId1/ID" and "users/userID2/ID"
+     */
+        // FOR CURRENT USER
+        //   /users/userID/chats
+        DatabaseReference userIDRef = Constants.USERS_REF.child(Constants.userID);
+        // delete entry in /users/userID/chats -> chatID
+        DatabaseReference userChatsRef = userIDRef.child("chats");
+        userChatsRef.child(chatID).removeValue();
+
+        // delete entry in /users/userID/chats_with_users  -> userID
+        DatabaseReference userChatsWithUsersRef = userIDRef.child("chats_with_users");
+        userChatsWithUsersRef.child(matchedUserID).removeValue();
+
+        // for MATCHED USER
+        //   /users/userID/chats
+        DatabaseReference matchedUserIDRef = Constants.USERS_REF.child(matchedUserID);
+        // delete entry in /users/userID/chats -> chatID
+        DatabaseReference matchedUserChatsRef = matchedUserIDRef.child("chats");
+        matchedUserChatsRef.child(chatID).removeValue();
+
+        // delete entry in /users/userID/chats_with_users  -> userID
+        DatabaseReference matchedUserChatsWithUsersRef = matchedUserIDRef.child("chats_with_users");
+        matchedUserChatsWithUsersRef.child(Constants.userID).removeValue();
+
+        // REMOVE new entries in chats_members
+        DatabaseReference chatsMembersRef = Constants.CHATS_MEMBERS_REF;
+        DatabaseReference newChatsMembersRef = chatsMembersRef.child(chatID);
+        newChatsMembersRef.removeValue();
+
+        //REMOVE new entries in chats_messages
+        DatabaseReference chatsMessagesRef = Constants.CHATS_MESSAGES_REF;
+        chatsMessagesRef.child(chatID).removeValue();
+
+        // REMOVE new entries in chats_meta under "users/userId1/currentUserID" and "users/userID2/matchedUserID"
+        // for current user
+        DatabaseReference chatsMetaUserRef = Constants.CHATS_META_REF.child(Constants.userID);
+        DatabaseReference newChatMetaRef = chatsMetaUserRef.child(chatID);
+        newChatMetaRef.removeValue();
+
+        // for matched user
+        DatabaseReference chatsMetaMatchedUserRef = Constants.CHATS_META_REF.child(matchedUserID);
+        DatabaseReference newChatMetaRefForMatchedUser = chatsMetaMatchedUserRef.child(chatID);
+        newChatMetaRefForMatchedUser.removeValue();
     }
 
 }
