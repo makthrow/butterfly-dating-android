@@ -51,7 +51,8 @@
         <activity
             android:name=".SettingsContactUsActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".ChatRoomActivity" />
+        <activity android:name=".ChatRoomActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity android:name=".ReportActivity"></activity>
     </application>
 

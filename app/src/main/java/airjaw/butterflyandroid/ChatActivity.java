@@ -36,6 +36,7 @@ public class ChatActivity extends AppCompatActivity {
     ListView chatList;
     private List<ChatRow> chatRowList = new ArrayList<>();
     private ChatRowCustomListAdapter adapter;
+    boolean activityOnPause;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,11 +74,17 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        activityOnPause = false;
         fetchChatsMeta();
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        activityOnPause = true;
     }
 
     private void fetchChatsMeta() {
@@ -86,7 +93,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override public void checkIfUsersAreMatched(boolean alreadyMatched) {}
             @Override public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {
                 chatsMeta = chatsMetaList;
-                populateChatRows(chatsMetaList);
+                if (!activityOnPause) { populateChatRows(chatsMetaList);}
             }
             @Override public void getBlockListCompleted(ArrayList<String> blockedUsers) {}
             @Override public void getChatStatusCompleted(boolean active) {}
@@ -137,7 +144,6 @@ public class ChatActivity extends AppCompatActivity {
             });
         }
     }
-
 
         @Override
     public boolean onCreateOptionsMenu(Menu menu) {
