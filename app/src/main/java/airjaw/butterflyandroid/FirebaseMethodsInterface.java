@@ -17,4 +17,6 @@ public interface FirebaseMethodsInterface {
 
     public void getBlockListCompleted(ArrayList<String> blockedUsers);
 
+    public void getChatStatusCompleted(boolean active);
+
 }

@@ -779,26 +779,16 @@ public class MeetActivity extends AppCompatActivity implements
     private void getBlockList() {
         // FILTER: BLOCK LIST
         FirebaseMethods.getBlockList(new FirebaseMethodsInterface() {
-            @Override
-            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
-
-            }
-
-            @Override
-            public void checkIfUsersAreMatched(boolean alreadyMatched) {
-
-            }
-
-            @Override
-            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {
-            }
-            @Override
-            public void getBlockListCompleted(ArrayList<String> fetchedBlockList) {
+            @Override public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {}
+            @Override public void checkIfUsersAreMatched(boolean alreadyMatched) {}
+            @Override public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {}
+            @Override public void getBlockListCompleted(ArrayList<String> fetchedBlockList) {
                 blockList = fetchedBlockList;
                 for (int i = 0; i < blockList.size(); i++) {
                     Log.i(TAG, "blocked user: " + blockList.get(i));
                 }
             }
+            @Override public void getChatStatusCompleted(boolean active) {}
         });
 
     }

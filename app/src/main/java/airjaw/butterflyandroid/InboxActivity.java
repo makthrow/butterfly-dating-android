@@ -382,19 +382,13 @@ public class InboxActivity extends AppCompatActivity {
 
         // check if matched
         FirebaseMethods.checkIfMatched(currentUserID, fromUserID, new FirebaseMethodsInterface() {
-            @Override
-            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
-
-            }
-
-            @Override
-            public void checkIfUsersAreMatched(boolean matched) {
+            @Override public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {}
+            @Override public void checkIfUsersAreMatched(boolean matched) {
                 if (matched) {
                     String reason = "Already Matched";
                     showErrorMatchAlert(reason);
                 }
                 else {
-
                     Map newMatchDic = setupNewMatchToSave(fromUserID, currentUserID);
                     if (newMatchDic != null) {
                         // have all the necessary info, setup a new chat
@@ -407,17 +401,9 @@ public class InboxActivity extends AppCompatActivity {
                     }
                 }
             }
-
-            @Override
-            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {
-
-            }
-
-            @Override
-            public void getBlockListCompleted(ArrayList<String> blockedUsers) {
-
-            }
-
+            @Override public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {}
+            @Override public void getBlockListCompleted(ArrayList<String> blockedUsers) {}
+            @Override public void getChatStatusCompleted(boolean active) {}
         });
     }
 
@@ -492,26 +478,16 @@ public class InboxActivity extends AppCompatActivity {
     private void getBlockList() {
         // FILTER: BLOCK LIST
         FirebaseMethods.getBlockList(new FirebaseMethodsInterface() {
-            @Override
-            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
-
-            }
-
-            @Override
-            public void checkIfUsersAreMatched(boolean alreadyMatched) {
-
-            }
-
-            @Override
-            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {
-            }
-            @Override
-            public void getBlockListCompleted(ArrayList<String> fetchedBlockList) {
+            @Override public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {}
+            @Override public void checkIfUsersAreMatched(boolean alreadyMatched) {}
+            @Override public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {}
+            @Override public void getBlockListCompleted(ArrayList<String> fetchedBlockList) {
                 blockList = fetchedBlockList;
                 for (int i = 0; i < blockList.size(); i++) {
                     Log.i(TAG, "blocked user: " + blockList.get(i));
                 }
             }
+            @Override public void getChatStatusCompleted(boolean active) {}
         });
 
     }

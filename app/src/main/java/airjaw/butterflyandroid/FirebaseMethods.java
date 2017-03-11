@@ -229,8 +229,7 @@ public class FirebaseMethods {
 
         if (lastMessage != null) {
             getUserFacebookInfoFor(matchedUserID, new FirebaseMethodsInterface() {
-                @Override
-                public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
+                @Override public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
                     if (fbInfo != null) {
                         String withUserName = fbInfo.getFirst_name();
                         String lastSender = "none"; // no last sender upon creation
@@ -243,21 +242,10 @@ public class FirebaseMethods {
                         newChatMetaRef.setValue(chatsMetaDic);
                     }
                 }
-                @Override
-                public void checkIfUsersAreMatched(boolean matched) {
-
-                }
-
-                @Override
-                public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {
-
-                }
-
-                @Override
-                public void getBlockListCompleted(ArrayList<String> blockedUsers) {
-
-                }
-
+                @Override public void checkIfUsersAreMatched(boolean matched) {}
+                @Override public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {}
+                @Override public void getBlockListCompleted(ArrayList<String> blockedUsers) {}
+                @Override public void getChatStatusCompleted(boolean active) {}
             });
         }
     }
@@ -473,6 +461,7 @@ public class FirebaseMethods {
         DatabaseReference newChatMetaRefForMatchedUser = chatsMetaMatchedUserRef.child(chatID);
         newChatMetaRefForMatchedUser.removeValue();
     }
+
     public static void getBlockList(final FirebaseMethodsInterface callback) {
         DatabaseReference blockedUsersRef = Constants.USERS_REF.child(Constants.userID).child("blockedUserIDs");
 
@@ -500,9 +489,29 @@ public class FirebaseMethods {
 
             }
         });
-
-
-
     }
+
+    public static void observeChatActiveStatusFor(String chatID, final FirebaseMethodsInterface callback) {
+        DatabaseReference userIDRef = Constants.USERS_REF.child(Constants.userID);
+        // delete entry in /users/userID/chats -> chatID
+        DatabaseReference userChatsRef = userIDRef.child("chats");
+        userChatsRef.child(chatID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    callback.getChatStatusCompleted(true);
+                }
+                else {
+                    callback.getChatStatusCompleted(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.getChatStatusCompleted(false);
+            }
+        });
+    }
+
 
 }

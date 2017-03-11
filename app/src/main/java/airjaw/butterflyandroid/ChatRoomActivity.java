@@ -19,6 +19,8 @@ import android.widget.TextView;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.firebase.database.Query;
 
+import java.util.ArrayList;
+
 public class ChatRoomActivity extends AppCompatActivity {
 
     private String chatID;
@@ -48,7 +50,35 @@ public class ChatRoomActivity extends AppCompatActivity {
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        chatActive = true;
+        FirebaseMethods.observeChatActiveStatusFor(chatID, new FirebaseMethodsInterface() {
+            @Override
+            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
+
+            }
+
+            @Override
+            public void checkIfUsersAreMatched(boolean alreadyMatched) {
+
+            }
+
+            @Override
+            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {
+
+            }
+
+            @Override
+            public void getBlockListCompleted(ArrayList<String> blockedUsers) {
+
+            }
+
+            @Override
+            public void getChatStatusCompleted(boolean active) {
+                chatActive = active;
+                if (!chatActive) {
+                    showChatClosedNotification();
+                }
+            }
+        });
 
         Log.i(TAG, "chatID: " + chatID);
         Log.i(TAG, "withUserID: " + withUserID);
@@ -121,9 +151,6 @@ public class ChatRoomActivity extends AppCompatActivity {
         setupDataObserverForScroll();
     }
 
-    private void showChatClosedNotification(){
-
-    }
     private void setupDataObserverForScroll() {
         // TODO:
     }
@@ -192,6 +219,25 @@ public class ChatRoomActivity extends AppCompatActivity {
     }
     private void deleteCurrentChat() {
         FirebaseMethods.deleteChatFor(chatID, withUserID);
+    }
+
+    private void showChatClosedNotification() {
+        Log.i(TAG, "chat closed");
+        String title = "Closed";
+        String message = "This chat was closed";
+
+        AlertDialog alertDialog = new AlertDialog.Builder(ChatRoomActivity.this).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Aww, OK...",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        onSupportNavigateUp();
+                    }
+                });
+        alertDialog.show();
     }
 
 }

@@ -68,14 +68,12 @@ public class ChatActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         fetchChatsMeta();
-
     }
     @Override
     public void onDestroy() {
@@ -83,28 +81,15 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void fetchChatsMeta() {
-
         FirebaseMethods.fetchChatsMeta(new FirebaseMethodsInterface() {
-            @Override
-            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
-
-            }
-
-            @Override
-            public void checkIfUsersAreMatched(boolean alreadyMatched) {
-
-            }
-
-            @Override
-            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {
+            @Override public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {}
+            @Override public void checkIfUsersAreMatched(boolean alreadyMatched) {}
+            @Override public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMetaList) {
                 chatsMeta = chatsMetaList;
                 populateChatRows(chatsMetaList);
             }
-
-            @Override
-            public void getBlockListCompleted(ArrayList<String> blockedUsers) {
-
-            }
+            @Override public void getBlockListCompleted(ArrayList<String> blockedUsers) {}
+            @Override public void getChatStatusCompleted(boolean active) {}
         });
     }
 
