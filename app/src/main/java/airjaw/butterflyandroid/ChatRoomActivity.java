@@ -2,6 +2,7 @@ package airjaw.butterflyandroid;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -27,8 +29,11 @@ public class ChatRoomActivity extends AppCompatActivity {
     private String withUserID;
     private String title;
     private String withUserName; // gonna be the same as the title
-
+    ListView listOfMessages;
     private boolean chatActive;
+
+    int lastVisiblePosition;
+    int positionStart;
 
     private FirebaseListAdapter<ChatsMessage> adapter;
 
@@ -38,6 +43,8 @@ public class ChatRoomActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_room);
+
+        lastVisiblePosition = -1;
 
         Intent intent = getIntent();
         chatID = intent.getStringExtra("chatID");
@@ -51,28 +58,11 @@ public class ChatRoomActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         FirebaseMethods.observeChatActiveStatusFor(chatID, new FirebaseMethodsInterface() {
-            @Override
-            public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {
-
-            }
-
-            @Override
-            public void checkIfUsersAreMatched(boolean alreadyMatched) {
-
-            }
-
-            @Override
-            public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {
-
-            }
-
-            @Override
-            public void getBlockListCompleted(ArrayList<String> blockedUsers) {
-
-            }
-
-            @Override
-            public void getChatStatusCompleted(boolean active) {
+            @Override public void getUsersFBInfoCompleted(Facebook_Info fbInfo) {}
+            @Override public void checkIfUsersAreMatched(boolean alreadyMatched) {}
+            @Override public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {}
+            @Override public void getBlockListCompleted(ArrayList<String> blockedUsers) {}
+            @Override public void getChatStatusCompleted(boolean active) {
                 chatActive = active;
                 if (!chatActive) {
                     showChatClosedNotification();
@@ -114,9 +104,9 @@ public class ChatRoomActivity extends AppCompatActivity {
     }
 
     private void displayChatMessages() {
-        ListView listOfMessages = (ListView)findViewById(R.id.list_of_messages);
+        listOfMessages = (ListView)findViewById(R.id.list_of_messages);
 
-        Query latestChatsMessageQuery = Constants.CHATS_MESSAGES_REF.child(chatID).limitToLast(25);
+        Query latestChatsMessageQuery = Constants.CHATS_MESSAGES_REF.child(chatID);//.limitToLast(25);
 
         adapter = new FirebaseListAdapter<ChatsMessage>(this, ChatsMessage.class,
                 R.layout.chatmessage, latestChatsMessageQuery) {
@@ -129,9 +119,6 @@ public class ChatRoomActivity extends AppCompatActivity {
 
                 // Set their text
                 messageText.setText(chatsMessage.getText());
-
-                Log.i(TAG, chatsMessage.getSenderId());
-                Log.i(TAG, chatsMessage.getText());
 
                 if (chatsMessage.getSenderId().equals(Constants.userID)) {
                     messageUser.setText("Me");
@@ -146,13 +133,60 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
         };
 
+        setupDataObserverForScroll();
+
         listOfMessages.setAdapter(adapter);
 
-        setupDataObserverForScroll();
     }
 
     private void setupDataObserverForScroll() {
-        // TODO:
+
+        listOfMessages.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                lastVisiblePosition = firstVisibleItem + visibleItemCount;
+                lastVisiblePosition--;
+                positionStart = firstVisibleItem;
+                Log.i("lastVisiblePosition: ", Integer.toString(lastVisiblePosition));
+                Log.i("positionStart", Integer.toString(positionStart));
+            }
+        });
+        adapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                int messageCount = adapter.getCount();
+                // this is calling itself each time it finds another message...
+                // only want to set the scroll position when this is done finding all the messages
+//                Log.i("lastVisiblePosition", Integer.toString(lastVisiblePosition));
+//                Log.i("positionStart", Integer.toString(positionStart));
+//                Log.i("messageCount", Integer.toString(messageCount));
+//                Log.i("adapterCount", Integer.toString(adapter.getCount()));
+                if (adapter.getCount() == messageCount) {
+                    listOfMessages.setSelection(messageCount - 1);
+                }
+
+                // TODO: Fix this to make it more user-friendly
+                // ie. scroll to chat the user last read, rather than the latest sent
+
+//                if (lastVisiblePosition < messageCount) {
+//                    Log.i("Scrolling to position: ", Integer.toString(messageCount));
+//                }
+
+//                if (lastVisiblePosition == -1) {
+//                    // the recycler view is initially being loaded, scroll to bottom
+//                }
+//                if (positionStart >= (messageCount - 1) &&
+//                        lastVisiblePosition == (positionStart - 1)) {
+//                    // user is at the bottom of the list, scroll to the bottom of the list to show the newly added message.
+//                }
+            }
+        });
     }
 
     public void openReportActivity(View view) {
