@@ -257,15 +257,10 @@ public class FirebaseMethods {
         userFacebookInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 Facebook_Info info = dataSnapshot.getValue(Facebook_Info.class);
                 callback.getUsersFBInfoCompleted(info);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            @Override public void onCancelled(DatabaseError databaseError) {}
         });
     }
 
@@ -281,11 +276,7 @@ public class FirebaseMethods {
                 boolean exists = dataSnapshot.exists();
                 callback.checkIfUsersAreMatched(exists);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            @Override public void onCancelled(DatabaseError databaseError) {}
         });
     }
     public static void fetchChatsMeta(final FirebaseMethodsInterface callback) {
@@ -501,13 +492,9 @@ public class FirebaseMethods {
                 if (dataSnapshot.exists()) {
                     callback.getChatStatusCompleted(true);
                 }
-                else {
-                    callback.getChatStatusCompleted(false);
-                }
+                else { callback.getChatStatusCompleted(false); }
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+            @Override public void onCancelled(DatabaseError databaseError) {
                 callback.getChatStatusCompleted(false);
             }
         });

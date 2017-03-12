@@ -64,9 +64,7 @@ public class ChatRoomActivity extends AppCompatActivity {
             @Override public void getBlockListCompleted(ArrayList<String> blockedUsers) {}
             @Override public void getChatStatusCompleted(boolean active) {
                 chatActive = active;
-                if (!chatActive) {
-                    showChatClosedNotification();
-                }
+                if (!chatActive) { showChatClosedNotification();}
             }
         });
 
@@ -83,13 +81,9 @@ public class ChatRoomActivity extends AppCompatActivity {
                 EditText input = (EditText)findViewById(R.id.input);
                 String inputString = input.getText().toString();
 
-                if (chatActive) {
-                    FirebaseMethods.createChatsMessagesFor(chatID, Constants.userID, withUserID, inputString);
-                    // animate sending message
-                }
-                else {
-                    showChatClosedNotification();
-                }
+                // animate sending message
+                if (chatActive) { FirebaseMethods.createChatsMessagesFor(chatID, Constants.userID, withUserID, inputString);}
+                else { showChatClosedNotification();}
 
                 input.setText("");
             }
@@ -106,47 +100,37 @@ public class ChatRoomActivity extends AppCompatActivity {
     private void displayChatMessages() {
         listOfMessages = (ListView)findViewById(R.id.list_of_messages);
 
-        Query latestChatsMessageQuery = Constants.CHATS_MESSAGES_REF.child(chatID);//.limitToLast(25);
+        Query latestChatsMessageQuery = Constants.CHATS_MESSAGES_REF.child(chatID);
 
         adapter = new FirebaseListAdapter<ChatsMessage>(this, ChatsMessage.class,
                 R.layout.chatmessage, latestChatsMessageQuery) {
             @Override
             protected void populateView(View v, ChatsMessage chatsMessage, int position) {
-                // Get references to the views of message.xml
+                // Get references to the views of chatmessage.xml
                 TextView messageText = (TextView)v.findViewById(R.id.message_text);
                 TextView messageUser = (TextView)v.findViewById(R.id.message_user);
                 TextView messageTime = (TextView)v.findViewById(R.id.message_time);
 
-                // Set their text
                 messageText.setText(chatsMessage.getText());
 
                 if (chatsMessage.getSenderId().equals(Constants.userID)) {
                     messageUser.setText("Me");
                 }
-                else {
-                    messageUser.setText(withUserName);
-                }
+                else { messageUser.setText(withUserName);}
 
                 // Format the date before showing it
                 messageTime.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)",
                         chatsMessage.getTimestampLong()));
             }
         };
-
         setupDataObserverForScroll();
-
         listOfMessages.setAdapter(adapter);
-
     }
 
     private void setupDataObserverForScroll() {
 
         listOfMessages.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-            }
-
+            @Override public void onScrollStateChanged(AbsListView view, int scrollState) {}
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 lastVisiblePosition = firstVisibleItem + visibleItemCount;
@@ -167,9 +151,9 @@ public class ChatRoomActivity extends AppCompatActivity {
 //                Log.i("positionStart", Integer.toString(positionStart));
 //                Log.i("messageCount", Integer.toString(messageCount));
 //                Log.i("adapterCount", Integer.toString(adapter.getCount()));
-                if (adapter.getCount() == messageCount) {
-                    listOfMessages.setSelection(messageCount - 1);
-                }
+//                if (adapter.getCount() == messageCount) {
+//                    listOfMessages.setSelection(messageCount - 1);
+//                }
 
                 // TODO: Fix this to make it more user-friendly
                 // ie. scroll to chat the user last read, rather than the latest sent
@@ -194,8 +178,8 @@ public class ChatRoomActivity extends AppCompatActivity {
         reportIntent.putExtra("withUserName", withUserName);
         reportIntent.putExtra("userIDToReport", withUserID);
         startActivity(reportIntent);
-
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_chatroom, menu);
@@ -207,23 +191,19 @@ public class ChatRoomActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.report:
                 Log.i("ChatRoomActivityMenu", "report");
-
                 Intent reportIntent = new Intent(this, ReportActivity.class);
                 reportIntent.putExtra("withUserName", withUserName);
                 reportIntent.putExtra("userIDToReport", withUserID);
                 startActivity(reportIntent);
-
                 return true;
             case R.id.delete:
                 Log.i("ChatRoomActivityMenu", "delete");
                 showConfirmDeleteNotification();
                 return true;
-
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
     }
 

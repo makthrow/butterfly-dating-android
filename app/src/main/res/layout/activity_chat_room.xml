@@ -52,11 +52,12 @@ tools:context="airjaw.butterflyandroid.ChatRoomActivity">
 <ListView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_alignParentTop="true"
-    android:layout_alignParentStart="true"
+    android:layout_below="@id/my_toolbar"
+    android:layout_marginTop="10dp"
     android:layout_above="@id/fab"
     android:dividerHeight="16dp"
     android:divider="@android:color/transparent"
     android:id="@+id/list_of_messages"
-    android:layout_marginBottom="16dp"/>
+    android:layout_marginBottom="16dp"
+    />
 </RelativeLayout>

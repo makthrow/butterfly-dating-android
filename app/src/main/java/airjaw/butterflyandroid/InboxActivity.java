@@ -395,10 +395,7 @@ public class InboxActivity extends AppCompatActivity {
                         FirebaseMethods.setupNewChatWith(fromUserID);
                         showMeetPersonAlert();
                     }
-                    else {
-                        // show error alert
-                        showErrorMatchAlert(null);
-                    }
+                    else { showErrorMatchAlert(null);}
                 }
             }
             @Override public void fetchChatsMetaCompleted(ArrayList<ChatsMeta> chatsMeta) {}
@@ -426,7 +423,6 @@ public class InboxActivity extends AppCompatActivity {
                     put("timestamp", Constants.firebaseServerValueTimestamp);
                     put("userID1", userID);
                     put("userID2", fromUserID);
-
                 }
             };
                     return matchDic;

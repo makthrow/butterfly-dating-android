@@ -75,6 +75,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         activityOnPause = false;
+        chatRowList.clear();
         fetchChatsMeta();
     }
     @Override
