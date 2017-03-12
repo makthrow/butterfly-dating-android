@@ -151,9 +151,9 @@ public class ChatRoomActivity extends AppCompatActivity {
 //                Log.i("positionStart", Integer.toString(positionStart));
 //                Log.i("messageCount", Integer.toString(messageCount));
 //                Log.i("adapterCount", Integer.toString(adapter.getCount()));
-//                if (adapter.getCount() == messageCount) {
-//                    listOfMessages.setSelection(messageCount - 1);
-//                }
+                if (adapter.getCount() == messageCount) {
+                    listOfMessages.setSelection(messageCount - 1);
+                }
 
                 // TODO: Fix this to make it more user-friendly
                 // ie. scroll to chat the user last read, rather than the latest sent
