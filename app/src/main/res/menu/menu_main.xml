@@ -5,7 +5,7 @@
         android:enabled="true"
         android:title="Home"
         app:showAsAction="always"
-        android:icon="@drawable/ic_photo_camera_black_24dp" />
+        android:icon="@drawable/compact_camera_000000_50" />
     <item android:id="@+id/tab_meet"
         android:enabled="true"
         android:title="Meet"

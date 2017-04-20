@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'mbpro13key'
+            keyPassword '86n5U#Y5Ro3j'
+            storeFile file('/Users/airjaw/Dropbox/keystores/android.jks')
+            storePassword 'gy6gAL74$p46'
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -10,11 +18,13 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled = true
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
     productFlavors {
@@ -51,9 +61,7 @@ dependencies {
     // for dates and times
     compile 'net.danlew:android.joda:2.9.5.1'
     compile 'com.google.android.exoplayer:exoplayer:r2.2.0'
-
     compile 'com.android.volley:volley:1.0.0'
-
 }
 
 

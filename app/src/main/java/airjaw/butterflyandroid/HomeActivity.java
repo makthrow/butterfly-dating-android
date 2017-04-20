@@ -2,9 +2,11 @@ package airjaw.butterflyandroid;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.location.Location;
+import android.net.Uri;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -18,8 +20,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Network;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.facebook.AccessToken;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.common.ConnectionResult;
@@ -29,8 +36,11 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.StorageReference;
 
 import airjaw.butterflyandroid.Camera.CamActivity;
+import airjaw.butterflyandroid.app.AppController;
 
 
 public class HomeActivity extends AppCompatActivity implements
@@ -42,6 +52,8 @@ public class HomeActivity extends AppCompatActivity implements
     private LocationServices locationClient;
     private LocationRequest mLocationRequest;
     Location lastLocation;
+    private NetworkImageView profilePicImageView;
+    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +68,33 @@ public class HomeActivity extends AppCompatActivity implements
 
         initLocation();
 
+        TextView nameAgeLabel = (TextView) findViewById(R.id.nameAgeTextView);
+
+        SharedPreferences prefs = getSharedPreferences(Constants.USER_FBINFO_PREFS, MODE_PRIVATE);
+
+        String name = prefs.getString("first_name", "none");
+        int age = prefs.getInt("age", 0);
+        Log.i(TAG, name);
+        Log.i(TAG, String.valueOf(age));
+
+        String nameAndAge = name + ", " + String.valueOf(age);
+        nameAgeLabel.setText(nameAndAge);
+
+        profilePicImageView = (NetworkImageView) findViewById(R.id.home_fb_pic_thumbnail);
+        if (imageLoader == null)
+            imageLoader = AppController.getInstance().getImageLoader();
+
+        StorageReference fbPhotoRef = Constants.storageFBProfilePicRef.child(Constants.userID);
+        fbPhotoRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+
+                String profilePicURL = uri.toString();
+                Log.i(TAG, "retrieved profilePicURL: " + profilePicURL);
+                // set profile pic url
+                profilePicImageView.setImageUrl(profilePicURL, imageLoader);
+            }
+        });
     }
 
     @Override
