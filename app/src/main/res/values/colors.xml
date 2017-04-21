@@ -7,7 +7,8 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorSettingsSwitch">#ff0000</color>
     <color name="colorTaskbar">#cdd1e5</color>
-
+    <color name="colorControlNormal">#123456</color>
+    <color name="colorControlActivated">#406</color>
 
     <!--chat row stuff-->
     <color name="colorLastMessage">#000000</color>
