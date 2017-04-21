@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class ChatRoomActivity extends AppCompatActivity {
             @Override public void getBlockListCompleted(ArrayList<String> blockedUsers) {}
             @Override public void getChatStatusCompleted(boolean active) {
                 chatActive = active;
-                if (!chatActive) { showChatClosedNotification();}
+                if (!chatActive && !isDestroyed()) { showChatClosedNotification();}
             }
         });
 
@@ -89,6 +90,12 @@ public class ChatRoomActivity extends AppCompatActivity {
             }
         });
         displayChatMessages();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // remove all listeners
     }
 
     @Override
