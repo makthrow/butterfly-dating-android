@@ -359,7 +359,7 @@ public class MeetActivity extends AppCompatActivity implements
 
         long twentyFourHoursStartTime = currentTimeInMilliseconds - Constants.twentyFourHoursInMilliseconds;
         long endTime = currentTimeInMilliseconds;
-        long monthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31);
+//        long monthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31);
 
         // GENDER FILTER
         Context context = this;
@@ -367,7 +367,6 @@ public class MeetActivity extends AppCompatActivity implements
         final boolean showMen = settingsPrefs.getBoolean("meetMenSwitch", false);
         final boolean showWomen = settingsPrefs.getBoolean("meetWomenSwitch", false);
 
-        // custom query (set to one month currently)
         Query twentyFourHourqueryRef = Constants.MEDIA_INFO_REF.orderByChild("timestamp").startAt(twentyFourHoursStartTime).endAt(endTime);
 
         // Read from the database

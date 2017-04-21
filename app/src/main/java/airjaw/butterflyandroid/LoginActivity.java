@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         info = (TextView)findViewById(R.id.info);
         loginButton = (LoginButton)findViewById(R.id.login_button);
-        loginButton.setReadPermissions("public_profile", "email", "user_friends", "user_education_history", "user_birthday");
+        loginButton.setReadPermissions("public_profile", "email", "user_friends", "user_birthday");
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -190,8 +190,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean verifyFacebookPermissionsGranted(LoginResult result) {
         if (result.getRecentlyDeniedPermissions().contains("user_birthday") ||
-                result.getRecentlyDeniedPermissions().contains("user_friends") ||
-                result.getRecentlyDeniedPermissions().contains("user_education_history")) {
+                result.getRecentlyDeniedPermissions().contains("user_friends")) {
             return false;
         }
         return true;
