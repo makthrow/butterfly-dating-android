@@ -172,7 +172,7 @@ public class FirebaseMethods {
         DatabaseReference userChatsWithUsersRef = userIDRef.child("chats_with_users");
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put(matchedUserID, true);
-        userChatsWithUsersRef.setValue(map);
+        userChatsWithUsersRef.updateChildren(map);
 
         // ------------------------------------------------
 
@@ -186,7 +186,7 @@ public class FirebaseMethods {
         DatabaseReference withUserChatsWithUsersRef = withUserIDRef.child("chats_with_users");
         HashMap<String, Object> map2 = new HashMap<String, Object>();
         map2.put(Constants.userID, true);
-        withUserChatsWithUsersRef.setValue(map2);
+        withUserChatsWithUsersRef.updateChildren(map2);
 
         createChatsMembersFor(newChatID, Constants.userID, matchedUserID);
 
@@ -499,6 +499,4 @@ public class FirebaseMethods {
             }
         });
     }
-
-
 }
