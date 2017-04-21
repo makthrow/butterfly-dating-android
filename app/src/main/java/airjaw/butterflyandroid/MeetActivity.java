@@ -93,6 +93,7 @@ public class MeetActivity extends AppCompatActivity implements
     int selectedUserAtIndexPath;
 
     boolean currentlyPlayingVideo = false;// setting this bool avoids an exception with presenting video player modally over each other on multiple user taps.
+    private boolean userIsAdmin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +139,8 @@ public class MeetActivity extends AppCompatActivity implements
 
         initLocation();
 
+        userIsAdmin = false;
+
     }
 
     @Override
@@ -149,10 +152,15 @@ public class MeetActivity extends AppCompatActivity implements
         Log.i(TAG, "onStart");
 
         if (!shouldResumeVideo) {
-
             getUserLocation();
-//        getLocalIntroductions(); // TODO: change back for production
-            getIntroductionsForAdmin(); // TODO: comment out for production
+
+            if (userIsAdmin) {
+                getIntroductionsForAdmin();
+            }
+            else {
+                getLocalIntroductions();
+
+            }
         }
         else {
             playVideoAtCell(lastVideoPlaying);
