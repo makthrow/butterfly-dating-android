@@ -1,7 +1,7 @@
 # butterfly-dating-android
 Butterfly Social / Dating app in Android/Java
 
-http://joinbutterfly.com
+http://joinbutterfly.com/android
 
 This is a dating app with a mix of tinder and snapchat features.
 
