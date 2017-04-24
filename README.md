@@ -1,7 +1,7 @@
 # butterfly-dating-android
 Butterfly Social / Dating app in Android/Java
 
-Butterfly Social's URL is http://joinbutterfly.com
+http://joinbutterfly.com
 
 This is a dating app with a mix of tinder and snapchat features.
 
