@@ -64,16 +64,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
 
-                /*
-                info.setText(
-                        "User ID: "
-                                + loginResult.getAccessToken().getUserId()
-                                + "\n" +
-                                "Auth Token: "
-                                + loginResult.getAccessToken().getToken()
-                );
-                */
-
                 // check key permissions from facebook granted.
                 // if user goes into facebook settings and revokes permissions later, need to handle that somehow
                 // but we will have all of the data we need saved upon login
@@ -118,7 +108,6 @@ public class LoginActivity extends AppCompatActivity {
                     // Name, email address, and profile photo Url
                     String name = mFirebaseUser.getDisplayName();
                     String email = mFirebaseUser.getEmail();
-                   // Uri photoUrl = user.getPhotoUrl();
 
                     // The user's ID, unique to the Firebase project. Do NOT use this value to
                     // authenticate with your backend server, if you have one. Use

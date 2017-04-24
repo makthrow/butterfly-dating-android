@@ -179,8 +179,6 @@ public class InboxActivity extends AppCompatActivity {
 
         final ArrayList<String> mediaLocationKeysWithinRadius = new ArrayList<String>();
 
-        // FILTER: BLOCK LIST
-
         getBlockList();
 
         // GENDER FILTER

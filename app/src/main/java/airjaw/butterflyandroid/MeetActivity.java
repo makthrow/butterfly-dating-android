@@ -153,14 +153,7 @@ public class MeetActivity extends AppCompatActivity implements
 
         if (!shouldResumeVideo) {
             getUserLocation();
-
-            if (userIsAdmin) {
-                getIntroductionsForAdmin();
-            }
-            else {
-                getLocalIntroductions();
-
-            }
+            getLocalIntroductions();
         }
         else {
             playVideoAtCell(lastVideoPlaying);
@@ -367,7 +360,6 @@ public class MeetActivity extends AppCompatActivity implements
 
         long twentyFourHoursStartTime = currentTimeInMilliseconds - Constants.twentyFourHoursInMilliseconds;
         long endTime = currentTimeInMilliseconds;
-//        long monthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31);
 
         // GENDER FILTER
         Context context = this;
@@ -389,25 +381,12 @@ public class MeetActivity extends AppCompatActivity implements
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String name = (String)snapshot.child("name").getValue();
-                    Log.i(TAG, "name: " + name);
-
                     String gender = (String)snapshot.child("gender").getValue();
-                    Log.i(TAG, "gender: " + gender);
-
                     String mediaID = (String)snapshot.child("mediaID").getValue();
-                    Log.i(TAG, "mediaID: " + mediaID);
-
                     String title = (String)snapshot.child("title").getValue();
-                    Log.i(TAG, "title: " + title);
-
                     String userID = (String)snapshot.child("userID").getValue();
-                    Log.i(TAG, "userID: " + userID);
-
                     long timestamp = (Long)snapshot.child("timestamp").getValue();
-                    Log.i(TAG, "timestamp: " + timestamp);
-
                     long age = (Long)snapshot.child("age").getValue();
-
                     String nameAndTitle = name + ": " + title;
 
                     if (showMen && showWomen) {
@@ -456,150 +435,6 @@ public class MeetActivity extends AppCompatActivity implements
                 stringAdapter.notifyDataSetChanged();
 
                 Log.i("ARRAY", mediaIntroQueueListTitles.toString());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
-    }
-
-    private void getIntroductionsForAdmin() {
-
-        // special method for debugging/testing purposes
-        // extends time filter to a month (or more) and removes location filter
-
-        final ArrayList<String> mediaLocationKeysWithinRadius = new ArrayList<String>();
-
-        lastGeoLocation = GeoFireGlobal.getInstance().getLastLocation();
-
-        if (lastGeoLocation != null) {
-            GeoQuery circleQuery = Constants.geoFireMedia.queryAtLocation(lastGeoLocation, 50);
-
-            circleQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                @Override
-                public void onKeyEntered(String key, GeoLocation location) {
-                    System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
-                    Log.i("Query: Key added", key.toString());
-
-                    mediaLocationKeysWithinRadius.add(key);
-
-                }
-                @Override
-                public void onKeyExited(String key) {
-
-                }
-
-                @Override
-                public void onKeyMoved(String key, GeoLocation location) {
-
-                }
-
-                @Override
-                public void onGeoQueryReady() {
-
-                }
-
-                @Override
-                public void onGeoQueryError(DatabaseError error) {
-                    Log.i("GeoQueryError:", error.toString());
-                }
-            });
-        }
-        else {
-            // last location is null
-            Log.i("LOCATION", "last location null)");
-        }
-
-        // FILTER: BLOCK LIST
-        getBlockList();
-
-        long currentTimeInMilliseconds = System.currentTimeMillis();
-        System.out.println("currentTimeInMilliseconds:" + currentTimeInMilliseconds);
-
-        long startTime = currentTimeInMilliseconds - Constants.twentyFourHoursInMilliseconds;
-        long endTime = currentTimeInMilliseconds;
-        long monthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 31);
-        long twoMonthStartTime = currentTimeInMilliseconds - (Constants.twentyFourHoursInMilliseconds * 61);
-
-
-        // GENDER FILTER
-        Context context = this;
-        SharedPreferences settingsPrefs = context.getSharedPreferences(Constants.USER_SETTINGS_PREFS, MODE_PRIVATE);
-        final boolean showMen = settingsPrefs.getBoolean("meetMenSwitch", false);
-        final boolean showWomen = settingsPrefs.getBoolean("meetWomenSwitch", false);
-
-        // custom query (set to one month currently)
-        Query twentyFourHourqueryRef = Constants.MEDIA_INFO_REF.orderByChild("timestamp").startAt(twoMonthStartTime).endAt(endTime);
-
-        // Read from the database
-        twentyFourHourqueryRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-
-                mediaIntroQueueList.clear();
-                mediaIntroQueueListTitles.clear();
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String name = (String)snapshot.child("name").getValue();
-                    Log.i(TAG, "name: " + name);
-
-                    String gender = (String)snapshot.child("gender").getValue();
-                    Log.i(TAG, "gender: " + gender);
-
-                    String mediaID = (String)snapshot.child("mediaID").getValue();
-                    Log.i(TAG, "mediaID: " + mediaID);
-
-                    String title = (String)snapshot.child("title").getValue();
-                    Log.i(TAG, "title: " + title);
-
-                    String userID = (String)snapshot.child("userID").getValue();
-                    Log.i(TAG, "userID: " + userID);
-
-                    long timestamp = (Long)snapshot.child("timestamp").getValue();
-                    Log.i(TAG, "timestamp: " + timestamp);
-
-                    long age = (Long)snapshot.child("age").getValue();
-
-                    String nameAndTitle = name + ": " + title;
-
-                    if (showMen && showWomen) {
-                        // show all users
-                    }
-                    else if (!showMen && !showWomen) {
-                        // show all users
-                    }
-                    else if (userID.equals(Constants.userID)) {
-                        // always show user's own intro
-                    }
-                    else if (!showMen && showWomen) {
-                        if (gender.equals("male")) {
-                            continue; // exit loop for this child
-                        }
-                    }
-                    else if (showMen && !showWomen) {
-                        if (gender.equals("female")) {
-                            continue; // exit loop for this child
-                        }
-                    }
-
-                    Media_Info mediaInfoDic = new Media_Info(age, gender, mediaID, name, title, userID);
-                    mediaInfoDic.setTimestamp(timestamp);
-
-                    if (!blockList.contains(userID)) {
-                        mediaIntroQueueList.add(mediaInfoDic);
-                        mediaIntroQueueListTitles.add(nameAndTitle);
-                    }
-                    else {
-                        Log.i(TAG, "blockList contains userID: " + userID);
-                    }
-                }
-
-                stringAdapter.notifyDataSetChanged();
             }
 
             @Override

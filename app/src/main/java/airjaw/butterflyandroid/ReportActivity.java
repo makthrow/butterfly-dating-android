@@ -29,9 +29,6 @@ public class ReportActivity extends AppCompatActivity {
         Intent intent = getIntent();
         userIDToReport = intent.getStringExtra("userIDToReport");
         withUserName = intent.getStringExtra("withUserName"); // save here to potentially use later
-
-        Log.i(TAG, "reporting userID: " + userIDToReport + " with userName: " + withUserName);
-
         String title = "Report this User?";
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle(title);

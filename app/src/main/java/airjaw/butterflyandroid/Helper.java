@@ -27,8 +27,6 @@ public class Helper {
         // facebook birthday in: MM/DD/YYYY
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
-//        JodaTimeAndroid.init(this); fixes java.io.IOException: Resource not found: "org/joda/time/tz/data/ZoneInfoMap
-
         try {
             Date date1 = dateFormat.parse(birthdayString);
 

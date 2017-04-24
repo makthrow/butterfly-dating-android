@@ -152,30 +152,9 @@ public class ChatRoomActivity extends AppCompatActivity {
             public void onChanged() {
                 super.onChanged();
                 int messageCount = adapter.getCount();
-                // this is calling itself each time it finds another message...
-                // only want to set the scroll position when this is done finding all the messages
-//                Log.i("lastVisiblePosition", Integer.toString(lastVisiblePosition));
-//                Log.i("positionStart", Integer.toString(positionStart));
-//                Log.i("messageCount", Integer.toString(messageCount));
-//                Log.i("adapterCount", Integer.toString(adapter.getCount()));
                 if (adapter.getCount() == messageCount) {
                     listOfMessages.setSelection(messageCount - 1);
                 }
-
-                // TODO: Fix this to make it more user-friendly
-                // ie. scroll to chat the user last read, rather than the latest sent
-
-//                if (lastVisiblePosition < messageCount) {
-//                    Log.i("Scrolling to position: ", Integer.toString(messageCount));
-//                }
-
-//                if (lastVisiblePosition == -1) {
-//                    // the recycler view is initially being loaded, scroll to bottom
-//                }
-//                if (positionStart >= (messageCount - 1) &&
-//                        lastVisiblePosition == (positionStart - 1)) {
-//                    // user is at the bottom of the list, scroll to the bottom of the list to show the newly added message.
-//                }
             }
         });
     }
